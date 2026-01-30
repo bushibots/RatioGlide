@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RatioGlide</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="ambient-light orb-1"></div>
+    <div class="ambient-light orb-2"></div>
+
+    <header class="navbar">
+        <div class="logo">RatioGlide</div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div class="stat-item">
+                <span id="target-wpm-disp">200</span> WPM
+            </div>
+            <button id="theme-btn" class="theme-switch">🌙 Dark</button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        
+        <section id="config-panel" class="card active">
+            <div style="margin: 2rem 0;">
+    <label>Practice Material (Optional)</label>
+    <textarea id="custom-input" 
+              placeholder="Paste a CLAT passage here to test yourself..." 
+              style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-primary); margin-top: 10px;"></textarea>
+</div>
+            <h2>Calibrate</h2>
+            <p style="color: var(--text-secondary);">Set your target speed for this session.</p>
+            
+            <div style="margin: 2rem 0;">
+                <label>Speed (WPM)</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="speed-slider" min="100" max="800" value="200" step="10">
+                    <span id="slider-val" style="font-weight: bold; width: 50px;">200</span>
+                </div>
+            </div>
+            
+            <button id="start-btn" class="primary-btn">Initialize Session</button>
+        </section>
+
+        <section id="reader-view" class="card hidden">
+            <div id="text-container" class="text-content"></div>
+        </section>
+
+        </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
