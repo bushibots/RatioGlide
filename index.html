@@ -22,6 +22,41 @@
     </header>
 
     <main class="app-container">
+        <section id="quiz-view" class="card hidden">
+    <h2>Comprehension Check</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Answer quickly. The clock is ticking.</p>
+    
+    <div id="question-container"></div>
+</section>
+
+<section id="results-view" class="card hidden">
+    <h2>Session Analysis</h2>
+    
+    <div class="score-grid">
+        <div class="score-card main-score">
+            <h3>Effective Speed (ERS)</h3>
+            <div class="big-number" id="final-ers">0</div>
+            <span class="unit">WPM</span>
+        </div>
+
+        <div class="stats-row">
+            <div class="score-card small">
+                <h3>Raw Speed</h3>
+                <div class="number" id="final-raw">0</div>
+            </div>
+            <div class="score-card small">
+                <h3>Precision</h3>
+                <div class="number" id="final-acc">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-box">
+        <p id="coach-feedback" class="feedback-text">Analyzing performance...</p>
+    </div>
+
+    <button id="restart-btn" class="secondary-btn" onclick="location.reload()">New Session</button>
+</section>
         
         <section id="config-panel" class="card active">
             <div style="margin: 2rem 0;">
