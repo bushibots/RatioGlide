@@ -89,8 +89,11 @@ body {
    ========================================= */
 .container {
     width: 95%;
-    max-width: 750px;
     position: relative;
+    width: 100%;
+    max-width: 900px; /* Slightly wider for better desktop reading */
+    margin: 0 auto;
+    padding: 10px; /* Padding for mobile edges */
 }
 
 .card {
@@ -98,10 +101,19 @@ body {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
-    padding: 2rem;
     margin-bottom: 2rem;
     /* Clean Visibility Toggling */
     display: none; 
+    width: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .card {
+        padding: 1.25rem;
+        border-radius: 15px;
+    }
 }
 
 .card.active { display: block; animation: fadeIn 0.3s ease-out; }
@@ -193,7 +205,6 @@ body {
     font-family: var(--font-read); font-size: 1.4rem; line-height: 1.8;
     color: var(--text-main); min-height: 250px;
 }
-.highlight { background: var(--accent); color: black; border-radius: 3px; padding: 0 2px; }
 .blur-active .word { filter: blur(4px); opacity: 0.3; }
 .blur-active .highlight { filter: blur(0) !important; opacity: 1 !important; transform: scale(1.05); }
 
@@ -304,6 +315,17 @@ body {
     background: rgba(79, 70, 229, 0.04); /* Light Indigo Tint */
     border-radius: 12px; border: 1px solid rgba(79, 70, 229, 0.2);
 }
+@media (max-width: 600px) {
+    .career-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2x2 grid on phones */
+    }
+    .career-stat:last-child {
+        border-left: none !important; /* Remove the divider on mobile */
+        border-top: 1px solid rgba(79, 70, 229, 0.2);
+        grid-column: span 2; /* Make Weakness Tracker full width */
+        padding-top: 10px;
+    }
+}
 .career-stat { text-align: center; }
 .career-val { 
     display: block; font-size: 1.5rem; font-weight: 800; 
@@ -354,6 +376,7 @@ body {
     100% { opacity: 0; transform: scale(1); }
 }
 
+
 .flag-trigger {
     animation: flagPulse 1.5s ease-out forwards;
 }
@@ -402,9 +425,29 @@ body {
     transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
+/* --- CONSOLIDATED HIGHLIGHTER --- */
 .highlight {
     background-color: var(--accent) !important;
     color: #000 !important;
-    filter: blur(0) !important; /* Force reveal */
-    opacity: 1 !important;      /* Force reveal */
+    border-radius: 4px;
+    padding: 2px 8px !important;
+    filter: blur(0) !important;      /* Forces reveal in Blur Mode */
+    opacity: 1 !important;           /* Forces visibility in Blur Mode */
+    transform: scale(1.05);          /* Subtle pop effect */
+    transition: all 0.1s ease-in-out;
+    display: inline-block;           /* Ensures background wraps chunks correctly */
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); /* Glow effect */
 }
+
+/* Reading Area Adjustments */
+#text-container {
+    font-size: clamp(1.2rem, 5vw, 2rem); /* Dynamic sizing */
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+@media (max-width: 480px) {
+    .card-title { font-size: 1.5rem; }
+    .btn-full { padding: 12px; font-size: 0.9rem; }
+}
+

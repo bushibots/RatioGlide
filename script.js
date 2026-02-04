@@ -128,26 +128,66 @@ async function triggerGeneration(topic) {
 }
 
 getEl('start-btn').addEventListener('click', () => {
+    // 1. Clear any existing timer
     if (state.intervalId) clearInterval(state.intervalId);
+
+    // 2. Capture and validate text
     const manual = getEl('manual-text-input').value.trim();
     if (manual.length > 0) state.originalText = manual;
     if (!state.originalText) { alert("Please provide text."); return; }
 
-    state.words = state.originalText.trim().split(/\s+/);
+    // 3. Prepare Content (Neural Chunking vs Single Word)
+    const rawWords = state.originalText.trim().split(/\s+/);
+    
+    if (state.isChunkMode) {
+        // Groups words into meaningful phrases of 3
+        state.words = [];
+        for (let i = 0; i < rawWords.length; i += 3) {
+            state.words.push(rawWords.slice(i, i + 3).join(' '));
+        }
+    } else {
+        state.words = rawWords;
+    }
+
     state.currentWordIndex = 0;
     state.targetWPM = parseInt(getEl('speed-slider').value);
     
+    // 4. Render to Container
     const container = getEl('text-container');
-    container.innerHTML = state.words.map((w, i) => `<span id="word-${i}" class="word">${w} </span>`).join('');
+    container.innerHTML = state.words.map((w, i) => 
+        `<span id="word-${i}" class="word">${w} </span>`
+    ).join('');
     
+    // 5. Apply Mode Classes
     if (state.isFocusBlur) container.classList.add('blur-active');
     else container.classList.remove('blur-active');
 
+    // 6. Start Session
     switchView('reader-view');
     state.startTime = Date.now();
     updateWordHighlight(0); 
-    state.intervalId = setInterval(tick, 60000 / state.targetWPM);
+    
+    // 7. Dynamic Interval (Adjusts speed for chunks so WPM remains accurate)
+    const multiplier = state.isChunkMode ? 3 : 1;
+    state.intervalId = setInterval(tick, (60000 / state.targetWPM) * multiplier);
 });
+
+window.toggleChunkMode = () => {
+    state.isChunkMode = !state.isChunkMode;
+    const btn = getEl('chunk-mode-btn');
+    
+    if (state.isChunkMode) {
+        btn.classList.add('active');
+        btn.innerHTML = "🧩 Chunk Mode: ON";
+        btn.style.backgroundColor = "var(--primary)";
+        btn.style.color = "white";
+    } else {
+        btn.classList.remove('active');
+        btn.innerHTML = "🧩 Chunk Mode: OFF";
+        btn.style.backgroundColor = "";
+        btn.style.color = "";
+    }
+};
 
 function tick() {
     state.currentWordIndex++;
@@ -164,8 +204,8 @@ function tick() {
 function updateWordHighlight(index) {
     const curr = getEl(`word-${index}`);
     if (curr) {
-        curr.classList.add('highlight'); // Matches CSS
-        curr.scrollIntoView({behavior:'auto', block:'center'});
+        curr.classList.add('highlight'); // Matches the consolidated CSS
+        curr.scrollIntoView({behavior:'auto', block:'nearest', inline:'center'});
     }
     if (index > 0) {
         const prev = getEl(`word-${index-1}`);
@@ -319,3 +359,12 @@ getEl('country-select').addEventListener('change', (e) => {
     else overlay.classList.add('bg-global');
     overlay.classList.add('flag-trigger');
 });
+
+function createChunks(words, size = 3) {
+    let chunks = [];
+    for (let i = 0; i < words.length; i += size) {
+        chunks.push(words.slice(i, i + size).join(' '));
+    }
+    return chunks;
+}
+

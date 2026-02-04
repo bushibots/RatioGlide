@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RatioGlide v7.5 | Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -81,13 +81,17 @@
             </div>
             <p id="status-msg" style="text-align:center; margin-top:10px; font-size:0.9rem; color:var(--primary); opacity:0;">Ready</p>
             
-            <label class="label">3. Settings</label>
+            <label class="label">Target Speed</label>
             <div style="display:flex; gap:10px; align-items:center;">
-                <input type="range" id="speed-slider" min="100" max="800" value="250" style="flex:1;">
+                <div class="wpm-badge">
+                <span id="target-wpm-disp">10</span> WPM
+            </div>
+                <input type="range" id="speed-slider" min="10" max="800" value="250" style="flex:1;">
                 <button id="paper-mode-btn" class="file-btn" onclick="togglePaperMode()">📜 Paper</button>
                 <button id="focus-blur-btn" class="file-btn" onclick="toggleFocusBlur()">💧 Blur</button>
+                <button id="chunk-mode-btn" class="file-btn" onclick="toggleChunkMode()">🧩 Chunk</button>    
             </div>
-
+            
             <button id="start-btn" class="btn-full">Start Reading Session</button>
         </section>
 
