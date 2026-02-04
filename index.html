@@ -3,139 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RatioGlide v6.0</title>
+    <title>RatioGlide v7.0 | Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="ambient-light orb-1"></div>
-    <div class="ambient-light orb-2"></div>
+    <div class="ambient-orb orb-primary"></div>
+    <div class="ambient-orb orb-secondary"></div>
+    <div class="ambient-orb orb-tertiary"></div>
 
-    <header class="navbar">
-        <div class="logo">RatioGlide <span style="font-size:0.5em; opacity:0.6">v6.0</span></div>
-        <div class="nav-controls">
-            <div class="stat-item"><span id="target-wpm-disp">250</span> WPM</div>
-            <button id="theme-btn" class="theme-switch">🌙</button>
+    <nav class="glass-nav">
+        <div class="logo-container">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">RatioGlide</span>
         </div>
-    </header>
-
-    <main class="app-container">
         
-        <section id="config-panel" class="card active">
-            
-            <div class="section-block">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <label>1. Content Source</label>
-                    <select id="country-select" class="glass-select">
-                        <option value="Global">🌍 Global / General</option>
-                        <option value="India" selected>🇮🇳 India (CLAT)</option>
-                        <option value="USA">🇺🇸 USA (LSAT)</option>
+        <div class="nav-actions">
+            <div class="stat-pill">
+                <span id="target-wpm-disp">250</span> <span class="unit">WPM</span>
+            </div>
+            <button id="theme-btn" class="icon-btn" aria-label="Toggle Theme">
+                <span class="icon">🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-stage">
+        
+        <section id="config-panel" class="glass-card active">
+            <div class="card-header">
+                <h2>Session Setup</h2>
+                <p>Configure your reading environment.</p>
+            </div>
+
+            <div class="control-group">
+                <label>1. Jurisdiction & Context</label>
+                <div class="select-wrapper">
+                    <select id="country-select" class="glass-input">
+                        <option value="Global">🌍 Global / General Context</option>
+                        <option value="India" selected>🇮🇳 India (CLAT/AILET)</option>
+                        <option value="USA">🇺🇸 USA (LSAT/Bar)</option>
                         <option value="UK">🇬🇧 UK (LNAT)</option>
                     </select>
                 </div>
+            </div>
 
-                <div class="topic-grid">
-                    <button class="topic-btn" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
-                    <button class="topic-btn" onclick="selectTopic('Logical Arguments')">🧠 Logical</button>
-                    <button class="topic-btn" onclick="selectTopic('Global Economics')">🌍 Economy</button>
-                    <button class="topic-btn" onclick="selectTopic('Philosophy & Ethics')">📜 Ethics</button>
-                </div>
+            <div class="control-group">
+                <label>2. Content Source</label>
                 
-                <div class="custom-gen-box">
-                    <input type="text" id="custom-topic-input" placeholder="Or type any topic..." />
-                    <button id="ai-generate-btn" class="icon-btn">✨</button>
+                <div class="chip-grid">
+                    <button class="chip-btn" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
+                    <button class="chip-btn" onclick="selectTopic('Logical Arguments')">🧠 Logic</button>
+                    <button class="chip-btn" onclick="selectTopic('Global Economics')">💸 Econ</button>
+                    <button class="chip-btn" onclick="selectTopic('Philosophy')">📜 Ethics</button>
                 </div>
-                <p id="status-msg" class="status-text">Ready</p>
-            </div>
 
-            <div class="section-block manual-block">
-                <label>2. Manual / Import</label>
-                <textarea id="manual-text-input" placeholder="Paste text here..." class="manual-textarea"></textarea>
-                <div class="file-upload-wrapper">
-                    <label for="file-upload" class="secondary-btn small-btn">📂 Import .txt</label>
-                    <input type="file" id="file-upload" accept=".txt">
-                    <span id="file-name-disp"></span>
-                </div>
-            </div>
-
-            <div class="section-block">
-                <label>3. Reading Experience</label>
-                <div class="settings-grid">
-                    <div class="control-group">
-                        <span>Speed</span>
-                        <input type="range" id="speed-slider" min="150" max="800" value="250" step="10">
-                        <span id="slider-val">250</span>
+                <div class="input-stack">
+                    <div class="ai-row">
+                        <input type="text" id="custom-topic-input" class="glass-input" placeholder="Or type a custom topic..." />
+                        <button id="ai-generate-btn" class="action-btn-small">✨ Generate</button>
                     </div>
-                    <div class="toggles-group">
-                        <button id="paper-mode-btn" class="toggle-btn" onclick="togglePaperMode()">📜 Paper Mode</button>
-                        <button id="focus-blur-btn" class="toggle-btn" onclick="toggleFocusBlur()">💧 Focus Blur</button>
+                    <div class="divider"><span>OR</span></div>
+                    <textarea id="manual-text-input" class="glass-input textarea-mode" placeholder="Paste your own text here..."></textarea>
+                    
+                    <div class="file-action">
+                        <input type="file" id="file-upload" accept=".txt" class="hidden-file">
+                        <label for="file-upload" class="file-label">📂 Upload .txt File</label>
+                        <span id="file-status" class="file-status"></span>
                     </div>
                 </div>
+                <p id="status-msg" class="status-indicator">System Ready</p>
             </div>
-            
-            <button id="start-btn" class="primary-btn">Initialize Session</button>
+
+            <div class="control-group">
+                <label>3. Reading Dynamics</label>
+                <div class="settings-row">
+                    <div class="slider-container">
+                        <input type="range" id="speed-slider" min="100" max="1000" value="250" step="10">
+                        <div class="slider-labels">
+                            <span>Slow</span>
+                            <span>Fast</span>
+                        </div>
+                    </div>
+                    <div class="toggles">
+                        <button id="paper-mode-btn" class="toggle-pill" onclick="togglePaperMode()">📜 Paper Mode</button>
+                        <button id="focus-blur-btn" class="toggle-pill" onclick="toggleFocusBlur()">💧 Focus Blur</button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="start-btn" class="cta-btn">Initialize Session</button>
         </section>
 
-        <section id="reader-view" class="card hidden">
-            <div id="text-container" class="text-content"></div>
+        <section id="reader-view" class="glass-card hidden">
+            <div class="reader-header">
+                <span class="live-indicator">● Reading Live</span>
+                <button class="text-btn" onclick="location.reload()">Abort</button>
+            </div>
+            <div id="text-container" class="reader-content"></div>
         </section>
 
-        <section id="quiz-view" class="card hidden">
-            <div id="ai-loader" class="hidden text-center">
-                <div class="loader-spinner"></div>
-                <h3>Evaluating...</h3>
+        <section id="quiz-view" class="glass-card hidden centered-card">
+            <div id="ai-loader">
+                <div class="neural-spinner"></div>
+                <h3>Analyzing Comprehension</h3>
+                <p>Generating questions & logic chains...</p>
             </div>
-            <div id="quiz-content">
-                <h2>Deep Analysis</h2>
+            <div id="quiz-content" class="hidden">
+                <div class="card-header">
+                    <h2>Phase 1: Comprehension</h2>
+                    <p>Select the best answer.</p>
+                </div>
                 <div id="question-container"></div>
             </div>
         </section>
 
-        <section id="sequence-view" class="card hidden">
-            <h2>Logic Chain</h2>
-            <p class="sub-text">Reconstruct the argument order.</p>
-            <div id="sequence-container" class="sequence-grid"></div>
-            <div id="sequence-feedback" class="feedback-mini"></div>
-            <button id="finish-seq-btn" class="primary-btn hidden">Finalize Score</button>
+        <section id="sequence-view" class="glass-card hidden">
+            <div class="card-header">
+                <h2>Phase 2: Logic Reconstruction</h2>
+                <p>Reorder the arguments chronologically.</p>
+            </div>
+            <div id="sequence-container" class="sequence-list"></div>
+            <div class="sequence-footer">
+                <span id="sequence-feedback" class="feedback-toast"></span>
+                <button id="finish-seq-btn" class="cta-btn hidden">Finalize Analysis</button>
+            </div>
         </section>
 
-        <section id="results-view" class="card hidden">
-            <h2>Report</h2>
-            <div class="score-grid">
-                <div class="score-card main-score">
-                    <h3>Effective WPM</h3>
-                    <div class="big-number" id="final-ers">0</div>
+        <section id="results-view" class="glass-card hidden">
+            <div class="card-header">
+                <h2>Performance Report</h2>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <span class="label">Effective Speed</span>
+                    <div class="value"><span id="final-ers">0</span> <small>WPM</small></div>
                 </div>
-                <div class="stats-row">
-                    <div class="score-card small"><h3>Raw</h3><div class="number" id="final-raw">0</div></div>
-                    <div class="score-card small"><h3>Acc</h3><div class="number" id="final-acc">0%</div></div>
+                <div class="stat-card">
+                    <span class="label">Raw Speed</span>
+                    <div class="value" id="final-raw">0</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Accuracy</span>
+                    <div class="value" id="final-acc">0%</div>
                 </div>
             </div>
 
-            <div class="feedback-box"><p id="coach-feedback">...</p></div>
-
-            <div class="vocab-section">
-                <h3>📚 Vocabulary</h3>
-                <div id="vocab-container" class="vocab-grid"></div>
+            <div class="analysis-box">
+                <p id="coach-feedback">Calculating...</p>
             </div>
 
-            <div class="review-section">
-                <h3>🔍 Review</h3>
-                <p class="sub-text">Highlight to define.</p>
-                <div id="review-text-container" class="review-text-box"></div>
+            <div class="expandable-section">
+                <h3>📚 Advanced Vocabulary</h3>
+                <div id="vocab-container" class="vocab-list"></div>
             </div>
-            <button id="restart-btn" class="secondary-btn">New Session</button>
+
+            <div class="expandable-section">
+                <h3>🔍 Passage Review</h3>
+                <p class="hint">Highlight text to define or search.</p>
+                <div id="review-text-container" class="review-box"></div>
+            </div>
+
+            <button id="restart-btn" class="secondary-btn">Start New Session</button>
         </section>
 
     </main>
 
-    <div id="lookup-tooltip">
-        <div class="tooltip-content">
-            <h4 id="tt-word">Word</h4>
-            <p id="tt-def">Definition...</p>
-            <a id="tt-link" href="#" target="_blank">Search &rarr;</a>
+    <div id="lookup-tooltip" class="tooltip-card">
+        <div class="tooltip-header">
+            <span id="tt-word">Word</span>
+            <a id="tt-link" href="#" target="_blank" class="external-link">↗</a>
         </div>
+        <p id="tt-def" class="tooltip-body">Loading...</p>
     </div>
 
     <script src="script.js"></script>

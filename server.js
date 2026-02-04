@@ -1,4 +1,4 @@
-/* server.js - v4.1 (Smart Contextual Generation) */
+/* server.js - RatioGlide v7.0 (Jurisdiction-Aware) */
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
@@ -12,7 +12,7 @@ app.use(express.static('.'));
 const API_KEYS = (process.env.GEMINI_KEYS || "").split(',');
 let currentKeyIndex = 0;
 
-// --- HELPER: ROTATION ---
+// --- HELPER: KEY ROTATION ---
 async function withKeyRotation(apiCallFn) {
     let success = false;
     let attempts = 0;
@@ -28,58 +28,72 @@ async function withKeyRotation(apiCallFn) {
             attempts++;
         }
     }
-    if (!success) throw new Error("All AI keys exhausted.");
+    if (!success) throw new Error("All AI keys exhausted. Please check .env file.");
     return result;
 }
 
 // --- ENDPOINTS ---
+
+// 1. Generate Quiz & Analysis
 app.post('/api/generate-quiz', async (req, res) => {
     const { text } = req.body;
+    if (!text) return res.status(400).json({ error: "No text provided" });
+
     try {
         const data = await withKeyRotation((key) => callGeminiHybrid(key, text));
         res.json(data);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Quiz Error:", err.message);
+        res.status(500).json({ error: "Failed to generate quiz." });
     }
 });
 
+// 2. Generate Passage (Jurisdiction Aware)
 app.post('/api/generate-text', async (req, res) => {
-    const { topic } = req.body;
+    const { topic, country } = req.body;
+    if (!topic) return res.status(400).json({ error: "No topic provided" });
+
     try {
-        const passage = await withKeyRotation((key) => callGeminiText(key, topic));
+        const passage = await withKeyRotation((key) => callGeminiText(key, topic, country));
         res.json({ text: passage });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Text Gen Error:", err.message);
+        res.status(500).json({ error: "Failed to generate text." });
     }
 });
 
-// --- AI LOGIC (FIXED) ---
+// --- AI LOGIC ---
 
-async function callGeminiText(key, category) {
+async function callGeminiText(key, category, country) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     
-    // SMART PROMPT MAPPING
+    // SMART CONTEXT MAPPING
+    let context = "";
+    if (country === "India") context = "under the Indian Penal Code (IPC), Constitution of India, or Indian Contract Act";
+    else if (country === "USA") context = "under US Federal Law, the Constitution, or relevant SCOTUS precedents";
+    else if (country === "UK") context = "under English Common Law and UK Statutes";
+    else context = "in a general international context";
+
     let specificInstruction = "";
     
     if (category.includes("Legal")) {
-        specificInstruction = "Write a mock 'Legal Reasoning' passage. Invent a complex legal principle (e.g., regarding Data Privacy or Tort Law) and describe a factual situation involving it. Do NOT define legal terms; apply them.";
+        specificInstruction = `Write a 'Legal Reasoning' passage ${context}. Cite real or realistic sections/articles relevant to ${country}. Focus on a complex legal principle.`;
     } else if (category.includes("Logical")) {
-        specificInstruction = "Write a dense 'Logical Reasoning' opinion piece. Argue strongly for a specific stance on a controversial topic (e.g., Crypto Regulation, Urban Sprawl, or Bio-ethics). The logic should be flawed or complex to test inference.";
-    } else if (category.includes("Economy")) {
-        specificInstruction = "Write an 'Economics' passage from a fictitious financial journal. Discuss a specific market phenomenon (e.g., Hyperinflation in a specific region) and its global ripple effects.";
+        specificInstruction = `Write a dense 'Logical Reasoning' editorial about a sociopolitical issue in ${country}. The argument should be nuanced and contain subtle flaws for analysis.`;
+    } else if (category.includes("Econ")) {
+        specificInstruction = `Write an 'Economics' analysis regarding ${country}'s market or a global financial trend affecting ${country}.`;
     } else {
-        // Fallback or Custom Topic
-        specificInstruction = `Write a dense, academic passage focused on "${category}". If "${category}" is a general subject, pick a specific niche sub-topic to write about.`;
+        specificInstruction = `Write a dense, academic passage about "${category}" in the context of ${country}.`;
     }
 
     const prompt = `
-        ACT AS AN EXAM SETTER (CLAT/GMAT).
+        ACT AS AN EXAM SETTER (CLAT/LSAT level).
         ${specificInstruction}
         
         Constraints:
-        - Length: 350-400 words.
+        - Length: 350-450 words.
         - Tone: Academic, objective, and dense.
-        - NO Title. NO Introduction (e.g. "Here is a passage"). Just the raw text.
+        - NO Title. NO Intro. NO "Here is the passage". Just the raw text.
     `;
 
     const response = await fetch(url, {
@@ -87,7 +101,8 @@ async function callGeminiText(key, category) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
-    if (!response.ok) throw new Error("Gemini Text Error");
+
+    if (!response.ok) throw new Error(`Gemini API Error: ${response.statusText}`);
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
 }
@@ -95,23 +110,21 @@ async function callGeminiText(key, category) {
 async function callGeminiHybrid(key, text) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
     
-    // UPDATED PROMPT: Now asks for Vocabulary too
     const prompt = `
-        Read this text: "${text.substring(0, 1500)}"
+        Read this text: "${text.substring(0, 2000)}"
         
-        Task 1: Generate 4 multiple choice questions (Main Idea, Detail, Inference, Critical).
-        Task 2: Generate 4 summary sentences in CHRONOLOGICAL ORDER for a logic chain test.
-        Task 3: Identify 4-6 difficult or academic words used in the text and provide their standard dictionary definitions.
+        Task 1: Generate 4 MCQs (Main Idea, Detail, Inference, Critical Thinking).
+        Task 2: Generate 4 summary sentences in CHRONOLOGICAL ORDER for a logic reconstruction task.
+        Task 3: Identify 4-6 difficult/academic words from the text and provide definitions.
         
-        Return JSON structure:
+        Return STRICT JSON format:
         {
             "questions": [
                 {"id": 1, "type": "Main Idea", "questionText": "...", "options": ["..."], "correctAnswer": "..."}
             ],
             "sequence": ["Step 1", "Step 2", "Step 3", "Step 4"],
             "vocabulary": [
-                {"word": "Esoteric", "definition": "Intended for or likely to be understood by only a small number of people with specialized knowledge."},
-                {"word": "Paradigm", "definition": "A typical example or pattern of something; a model."}
+                {"word": "Example", "definition": "Definition here."}
             ]
         }
     `;
@@ -122,11 +135,16 @@ async function callGeminiHybrid(key, text) {
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
 
-    if (!response.ok) throw new Error("Gemini Quiz Error");
+    if (!response.ok) throw new Error("Gemini Quiz API Error");
+    
     const data = await response.json();
-    const cleanJson = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(cleanJson);
+    let textData = data.candidates[0].content.parts[0].text;
+    
+    // Cleanup JSON markdown if present
+    textData = textData.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    return JSON.parse(textData);
 }
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`RatioGlide v4.1 running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`RatioGlide v7.0 running at http://localhost:${PORT}`));
