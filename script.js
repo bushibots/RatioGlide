@@ -1,4 +1,4 @@
-/* RatioGlide v7.5 - Stable Core */
+/* RatioGlide v7.6 - Career Mode */
 const state = {
     targetWPM: 250, words: [], originalText: "", currentWordIndex: 0, intervalId: null, 
     startTime: 0, endTime: 0, quizData: null, userAnswers: {}, userSequence: [], correctSequence: [],
@@ -7,20 +7,67 @@ const state = {
 
 const getEl = (id) => document.getElementById(id);
 
-// --- VIEW CONTROLLER ---
+// --- CAREER MANAGER (New Feature) ---
+const Career = {
+    save: (wpm, acc) => {
+        const session = { date: new Date().toISOString(), wpm: wpm, acc: acc };
+        const history = JSON.parse(localStorage.getItem('ratioglide_history') || '[]');
+        history.push(session);
+        localStorage.setItem('ratioglide_history', JSON.stringify(history));
+        Career.updateUI();
+    },
+    
+    getStats: () => {
+        const history = JSON.parse(localStorage.getItem('ratioglide_history') || '[]');
+        if (history.length === 0) return { total: 0, avgWpm: 0, bestAcc: 0 };
+        
+        const total = history.length;
+        const avgWpm = Math.round(history.reduce((a, b) => a + b.wpm, 0) / total);
+        const bestAcc = Math.max(...history.map(s => s.acc));
+        
+        return { total, avgWpm, bestAcc };
+    },
+
+    updateUI: () => {
+        const stats = Career.getStats();
+        // Update Config Panel Stats
+        if(getEl('stat-total')) getEl('stat-total').textContent = stats.total;
+        if(getEl('stat-avg')) getEl('stat-avg').textContent = stats.avgWpm;
+        if(getEl('stat-best')) getEl('stat-best').textContent = stats.bestAcc + '%';
+    }
+};
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    Career.updateUI(); // Load stats on startup
+});
+
+// --- VIEW NAV ---
 function switchView(viewId) {
-    document.querySelectorAll('.card').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.glass-card').forEach(el => {
+        el.classList.remove('active');
+        setTimeout(() => el.style.display = 'none', 400); 
+    });
     const target = getEl(viewId);
+    target.style.display = 'block';
+    void target.offsetWidth;
     target.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- CONFIGURATION ---
+// --- CONFIG ---
 window.selectTopic = (topic) => {
+    // 1. Visual Selection
     document.querySelectorAll('.chip').forEach(btn => btn.classList.remove('selected'));
     event.target.classList.add('selected');
-    getEl('custom-topic-input').value = "";
-    triggerGeneration(topic);
+    
+    // 2. Fill Input ONLY (Do not generate yet)
+    getEl('custom-topic-input').value = topic;
+    
+    // 3. Optional: Highlight the Generate button to show it's next
+    const genBtn = getEl('ai-generate-btn');
+    genBtn.style.transform = "scale(1.1)";
+    setTimeout(() => genBtn.style.transform = "scale(1)", 200);
 };
 
 getEl('ai-generate-btn').addEventListener('click', () => {
@@ -32,7 +79,7 @@ getEl('file-upload').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
     getEl('file-status').textContent = file.name;
-    getEl('file-status').style.color = "var(--primary)";
+    getEl('file-status').style.color = "var(--success)";
     
     const reader = new FileReader();
     reader.onload = (evt) => {
@@ -46,22 +93,22 @@ getEl('file-upload').addEventListener('change', (e) => {
 window.togglePaperMode = () => {
     state.isPaperMode = !state.isPaperMode;
     document.body.classList.toggle('paper-mode', state.isPaperMode);
+    getEl('paper-mode-btn').classList.toggle('active', state.isPaperMode);
 };
 window.toggleFocusBlur = () => {
     state.isFocusBlur = !state.isFocusBlur;
-    const btn = getEl('focus-blur-btn');
-    btn.style.backgroundColor = state.isFocusBlur ? "var(--primary)" : "";
-    btn.style.color = state.isFocusBlur ? "white" : "";
+    getEl('focus-blur-btn').classList.toggle('active', state.isFocusBlur);
 };
 
-// --- API ---
+// API
 async function triggerGeneration(topic) {
     const status = getEl('status-msg');
     const country = getEl('country-select').value;
     const btn = getEl('ai-generate-btn');
 
     status.style.opacity = 1;
-    status.textContent = `Writing "${topic}" (${country})...`;
+    status.textContent = `Drafting "${topic}" (${country})...`;
+    status.style.color = "var(--text-muted)";
     btn.textContent = "⏳";
     btn.disabled = true;
 
@@ -75,39 +122,37 @@ async function triggerGeneration(topic) {
         state.originalText = data.text;
         getEl('manual-text-input').value = "";
         
-        status.textContent = "Content Generated Successfully.";
-        btn.textContent = "Generate";
+        status.textContent = "Content Ready.";
+        status.style.color = "#10b981"; 
+        btn.textContent = "✨ Generate";
         btn.disabled = false;
     } catch (e) {
-        status.textContent = "Server Error. Check console.";
+        status.textContent = "Error: Check Server.";
         status.style.color = "red";
-        btn.textContent = "Retry";
+        btn.textContent = "❌ Retry";
         btn.disabled = false;
     }
 }
 
-// --- READER ---
+// READER 
 getEl('start-btn').addEventListener('click', () => {
     const manual = getEl('manual-text-input').value.trim();
     if (manual.length > 20) state.originalText = manual;
-    if (!state.originalText) { alert("Please provide text first."); return; }
+    if (!state.originalText) { alert("Please provide text."); return; }
 
     state.words = state.originalText.trim().split(/\s+/);
     state.currentWordIndex = 0;
     state.targetWPM = parseInt(getEl('speed-slider').value);
     
     const container = getEl('text-container');
-    container.innerHTML = state.words.map((w,i) => `<span id="word-${i}" class="word">${w} </span>`).join('');
+    container.innerHTML = state.words.map((w,i) => `<span id="word-${i}" class="word-span">${w} </span>`).join('');
     
     if(state.isFocusBlur) container.classList.add('blur-active');
     else container.classList.remove('blur-active');
 
     switchView('reader-view');
     state.startTime = Date.now();
-    
-    // Highlight First Word Immediately
-    updateHighlight(0);
-    
+    updateWordHighlight(0); 
     state.intervalId = setInterval(tick, 60000 / state.targetWPM);
 });
 
@@ -120,21 +165,25 @@ function tick() {
         generateQuiz();
         return;
     }
-    updateHighlight(state.currentWordIndex);
+    updateWordHighlight(state.currentWordIndex);
 }
 
-function updateHighlight(index) {
+function updateWordHighlight(index) {
     const curr = getEl(`word-${index}`);
     if (curr) {
-        curr.classList.add('highlight');
+        curr.classList.add('active-word');
         curr.scrollIntoView({behavior:'smooth', block:'center'});
     }
     if (index > 0) {
-        getEl(`word-${index-1}`).classList.remove('highlight');
+        const prev = getEl(`word-${index-1}`);
+        if (prev) {
+            prev.classList.remove('active-word');
+            prev.style.opacity = 0.4;
+        }
     }
 }
 
-// --- QUIZ ---
+// QUIZ
 async function generateQuiz() {
     try {
         const res = await fetch('/api/generate-quiz', {
@@ -144,19 +193,19 @@ async function generateQuiz() {
         state.quizData = await res.json();
         state.correctSequence = [...state.quizData.sequence];
         renderQuiz();
-    } catch (e) { alert("Quiz Failed to Load"); }
+    } catch (e) { alert("Quiz Gen Failed"); }
 }
 
 function renderQuiz() {
     getEl('ai-loader').style.display = 'none';
-    getEl('quiz-content').style.display = 'block';
+    getEl('quiz-content').classList.remove('hidden');
     
     getEl('question-container').innerHTML = state.quizData.questions.map(q => `
-        <div class="question-card">
+        <div class="q-box">
             <h3 style="margin-top:0">${q.questionText}</h3>
-            ${q.options.map(opt => `<button class="option-btn" onclick="selAns(${q.id}, '${opt.replace(/'/g, "\\'")}', this)">${opt}</button>`).join('')}
+            ${q.options.map(opt => `<button class="q-opt" onclick="selAns(${q.id}, '${opt.replace(/'/g, "\\'")}', this)">${opt}</button>`).join('')}
         </div>
-    `).join('') + `<button class="btn-full" onclick="startSeq()">Next Phase</button>`;
+    `).join('') + `<button class="cta-btn" onclick="startSeq()">Next Phase &rarr;</button>`;
 }
 
 window.selAns = (id, ans, btn) => {
@@ -165,13 +214,13 @@ window.selAns = (id, ans, btn) => {
     btn.classList.add('selected');
 };
 
-// --- SEQUENCE ---
+// SEQUENCE
 window.startSeq = () => {
     switchView('sequence-view');
     state.userSequence = [];
     const shuf = [...state.correctSequence].sort(() => 0.5 - Math.random());
-    getEl('sequence-container').innerHTML = shuf.map(t => `<div class="seq-item" onclick="clickSeq('${t.replace(/'/g, "\\'")}', this)">${t}<div class="seq-num"></div></div>`).join('');
-    getEl('finish-seq-btn').style.display = 'none';
+    getEl('sequence-container').innerHTML = shuf.map(t => `<div class="seq-item" onclick="clickSeq('${t.replace(/'/g, "\\'")}', this)">${t}<span class="seq-idx"></span></div>`).join('');
+    getEl('finish-seq-btn').classList.add('hidden');
 };
 
 window.clickSeq = (txt, el) => {
@@ -179,11 +228,11 @@ window.clickSeq = (txt, el) => {
     const idx = state.userSequence.length;
     if (txt === state.correctSequence[idx]) {
         el.classList.add('correct');
-        el.querySelector('.seq-num').textContent = idx + 1;
+        el.querySelector('.seq-idx').textContent = idx + 1;
         state.userSequence.push(txt);
         if (state.userSequence.length === state.correctSequence.length) {
             getEl('sequence-feedback').textContent = "Complete!";
-            getEl('finish-seq-btn').style.display = 'block';
+            getEl('finish-seq-btn').classList.remove('hidden');
         }
     } else {
         el.classList.add('wrong');
@@ -191,22 +240,33 @@ window.clickSeq = (txt, el) => {
     }
 };
 
-// --- RESULTS ---
+// RESULTS (WITH CAREER SAVE)
 getEl('finish-seq-btn').onclick = () => {
-    const mins = (state.endTime - state.startTime) / 60000;
-    const raw = Math.round(state.words.length / mins) || 0;
+    const timeMs = Math.max(state.endTime - state.startTime, 1000);
+    const timeMinutes = timeMs / 60000;
+    const totalChars = state.originalText.length;
+    const stdWords = totalChars / 5;
     
+    let raw = Math.round(stdWords / timeMinutes);
+    if (raw > state.targetWPM * 1.5) raw = state.targetWPM; // Sanity Cap
+
     let corr = 0;
     state.quizData.questions.forEach(q => { if(state.userAnswers[q.id] === q.correctAnswer) corr++; });
     const acc = (corr / state.quizData.questions.length) * 100;
-    const ers = Math.round(raw * (acc/100));
+    const final = (acc * 0.6) + 40; 
+    const ers = Math.round(raw * (final/100));
+
+    // SAVE STATS
+    Career.save(ers, Math.round(final));
 
     getEl('final-raw').textContent = raw;
-    getEl('final-acc').textContent = Math.round(acc) + "%";
+    getEl('final-acc').textContent = Math.round(final) + "%";
     getEl('final-ers').textContent = ers;
     
+    getEl('coach-feedback').innerHTML = `Session Recorded to Career History.`;
+
     getEl('vocab-container').innerHTML = (state.quizData.vocabulary || []).map(v => `
-        <div class="vocab-item">
+        <div class="vocab-card">
             <span class="vocab-term">${v.word}</span>
             ${v.definition}
         </div>
@@ -216,7 +276,7 @@ getEl('finish-seq-btn').onclick = () => {
     switchView('results-view');
 };
 
-// --- TOOLTIP ---
+// TOOLTIP
 const tt = getEl('lookup-tooltip');
 document.addEventListener('mouseup', async () => {
     const sel = window.getSelection();
@@ -224,9 +284,10 @@ document.addEventListener('mouseup', async () => {
     if (!txt || !getEl('review-text-container').contains(sel.anchorNode.parentElement)) {
         tt.classList.remove('visible'); return;
     }
-    
     const rect = sel.getRangeAt(0).getBoundingClientRect();
-    tt.style.left = `${rect.left + (rect.width/2) - 125}px`;
+    const ttW = 260;
+    const left = rect.left + (rect.width/2) - (ttW/2);
+    tt.style.left = `${left}px`;
     tt.style.top = `${rect.bottom + window.scrollY + 10}px`;
     tt.classList.add('visible');
     
@@ -252,3 +313,21 @@ getEl('theme-btn').onclick = () => {
     const n = r.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
     r.setAttribute('data-theme', n);
 };
+
+getEl('country-select').addEventListener('change', (e) => {
+    const val = e.target.value;
+    const overlay = getEl('flag-overlay');
+
+    // 1. Reset Animation (Force Reflow)
+    overlay.className = 'flag-overlay'; 
+    void overlay.offsetWidth; 
+
+    // 2. Apply Country Gradient
+    if (val === 'India') overlay.classList.add('bg-india');
+    else if (val === 'USA') overlay.classList.add('bg-usa');
+    else if (val === 'UK') overlay.classList.add('bg-uk');
+    else overlay.classList.add('bg-global');
+
+    // 3. Trigger Flash
+    overlay.classList.add('flag-trigger');
+});

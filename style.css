@@ -148,6 +148,22 @@ body {
     border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
     display: inline-block;
 }
+
+.file-btn:hover {
+    background: #ffffffb6; color: var(--primary); padding: 6px 12px;
+    border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: inline-block;
+}
+
+#paper-mode-btn.active, 
+#focus-blur-btn.active {
+    background-color: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+}
+
 .file-status { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
 
 /* Topic Chips */
@@ -264,4 +280,98 @@ body {
 @media(max-width: 600px) {
     .chip-container, .stats-grid, .vocab-grid { grid-template-columns: 1fr; }
     .card { padding: 1.5rem; }
+}
+
+.career-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 20px; padding: 15px;
+    background: rgba(79, 70, 229, 0.04); /* Light Indigo Tint */
+    border-radius: 12px; border: 1px solid rgba(79, 70, 229, 0.2);
+}
+.career-stat { text-align: center; }
+.career-val { 
+    display: block; font-size: 1.5rem; font-weight: 800; 
+    color: var(--primary); line-height: 1.1; margin-top: 5px;
+}
+
+#country-select {
+    appearance: none;             /* Hide default arrow */
+    -webkit-appearance: none;     /* Safari support */
+    -moz-appearance: none;        /* Firefox support */
+    
+    /* Custom Arrow Icon (Indigo) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234f46e5' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    
+    padding-right: 45px;          /* Space for the arrow */
+    font-weight: 700;
+    color: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+#country-select:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+#country-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.flag-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1; /* Behind content */
+    opacity: 0; pointer-events: none;
+    transition: none;
+}
+
+/* The Flash Animation */
+@keyframes flagPulse {
+    0% { opacity: 0; transform: scale(1.05); }
+    15% { opacity: 0.15; transform: scale(1); } /* Max brightness (15% opacity) */
+    100% { opacity: 0; transform: scale(1); }
+}
+
+.flag-trigger {
+    animation: flagPulse 1.5s ease-out forwards;
+}
+
+/* 🇮🇳 India: Saffron, White, Green */
+.bg-india {
+    background: linear-gradient(180deg, #FF9933 0%, #FF9933 33%, #FFFFFF 33%, #FFFFFF 66%, #138808 66%, #138808 100%);
+}
+
+/* 🇺🇸 USA: Red/White Stripes + Blue Overlay */
+.bg-usa {
+    background: 
+        linear-gradient(90deg, rgba(60, 59, 110, 0.8) 0%, transparent 40%),
+        repeating-linear-gradient(180deg, #B22234, #B22234 20px, #FFFFFF 20px, #FFFFFF 40px);
+}
+
+/* 🇬🇧 UK: Royal Blue with Red Cross Hints */
+.bg-uk {
+    background-color: #012169; /* Royal Blue */
+    background-image: 
+        /* 1. The Red Vertical/Horizontal Cross (St George) */
+        linear-gradient(90deg, transparent 46%, #C8102E 46%, #C8102E 54%, transparent 54%),
+        linear-gradient(180deg, transparent 44%, #C8102E 44%, #C8102E 56%, transparent 56%),
+        
+        /* 2. The White Vertical/Horizontal Borders */
+        linear-gradient(90deg, transparent 42%, #FFFFFF 42%, #FFFFFF 58%, transparent 58%),
+        linear-gradient(180deg, transparent 38%, #FFFFFF 38%, #FFFFFF 62%, transparent 62%),
+        
+        /* 3. The White Diagonals (St Andrew) */
+        linear-gradient(45deg, transparent 46%, #FFFFFF 46%, #FFFFFF 54%, transparent 54%),
+        linear-gradient(135deg, transparent 46%, #FFFFFF 46%, #FFFFFF 54%, transparent 54%);
+}
+
+/* 🌍 Global: Cyan/Blue Globe Vibe */
+.bg-global {
+    background: radial-gradient(circle at center, #3b82f6 0%, #06b6d4 100%);
 }

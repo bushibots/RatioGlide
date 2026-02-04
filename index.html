@@ -9,6 +9,8 @@
 </head>
 <body>
 
+    <div id="flag-overlay" class="flag-overlay"></div>
+
     <nav class="navbar">
         <div class="logo"><span>⚡</span> RatioGlide</div>
         <div class="nav-controls">
@@ -22,10 +24,29 @@
     <main class="container">
         
         <section id="config-panel" class="card active">
+
+            <h2 class="card-title">Performance Stats</h2>
+            
+            <div class="career-grid">
+                <div class="career-stat">
+                    <span class="label">Total Reads</span>
+                    <span id="stat-total" class="career-val">0</span>
+                </div>
+                <div class="career-stat">
+                    <span class="label">Avg Speed</span>
+                    <span id="stat-avg" class="career-val">0</span>
+                </div>
+                <div class="career-stat">
+                    <span class="label">Best Acc</span>
+                    <span id="stat-best" class="career-val">0%</span>
+                </div>
+            </div>
+
             <h2 class="card-title">Setup Session</h2>
             <p class="card-subtitle">Choose your content and reading preferences.</p>
 
             <label class="label">1. Source & Context</label>
+
             <div class="chip-container">
                 <button class="chip" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
                 <button class="chip" onclick="selectTopic('Logical Arguments')">🧠 Logic</button>
