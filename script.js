@@ -273,15 +273,10 @@ getEl('finish-seq-btn').onclick = () => {
     let raw = Math.round(stdWords / timeMinutes);
     if (raw > state.targetWPM * 1.5) raw = state.targetWPM; // Sanity Cap
 
-    let corr = 0;
-    state.quizData.questions.forEach(q => { if(state.userAnswers[q.id] === q.correctAnswer) corr++; });
-    const acc = (corr / state.quizData.questions.length) * 100;
-    const final = (acc * 0.6) + 40; 
-    const ers = Math.round(raw * (final/100));
-
-    // SAVE STATS
+    // 1. Calculate Accuracy & Track Missed Types
     let corr = 0;
     let missedTypes = [];
+    
     state.quizData.questions.forEach(q => { 
         if(state.userAnswers[q.id] === q.correctAnswer) {
             corr++; 
@@ -291,12 +286,27 @@ getEl('finish-seq-btn').onclick = () => {
         }
     });
 
-    // ... calculation code ...
     const acc = (corr / state.quizData.questions.length) * 100;
     const final = (acc * 0.6) + 40; 
     const ers = Math.round(raw * (final/100));
-    
+
+    // 2. SAVE STATS (With Weakness Data)
     Career.save(ers, Math.round(final), missedTypes);
+
+    // 3. Render UI
+    getEl('final-raw').textContent = raw;
+    getEl('final-acc').textContent = Math.round(final) + "%";
+    getEl('final-ers').textContent = ers;
+    
+    getEl('coach-feedback').innerHTML = `Session Recorded. Weakness Updated.`;
+
+    getEl('vocab-container').innerHTML = (state.quizData.vocabulary || []).map(v => `
+        <div class="vocab-item">
+            <span class="vocab-term">${v.word}</span>
+            ${v.definition}
+        </div>
+    `).join('');
+    
     getEl('review-text-container').innerHTML = state.originalText;
     switchView('results-view');
 };
