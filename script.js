@@ -9,31 +9,54 @@ const getEl = (id) => document.getElementById(id);
 
 // --- CAREER MANAGER (New Feature) ---
 const Career = {
-    save: (wpm, acc) => {
-        const session = { date: new Date().toISOString(), wpm: wpm, acc: acc };
+    save: (wpm, acc, missedTypes) => {
         const history = JSON.parse(localStorage.getItem('ratioglide_history') || '[]');
-        history.push(session);
+        // Save session + missed question types
+        history.push({ 
+            date: new Date().toISOString(), 
+            wpm, 
+            acc,
+            missed: missedTypes || [] // Store array of strings like ["Inference", "Main Idea"]
+        });
         localStorage.setItem('ratioglide_history', JSON.stringify(history));
         Career.updateUI();
     },
     
     getStats: () => {
         const history = JSON.parse(localStorage.getItem('ratioglide_history') || '[]');
-        if (history.length === 0) return { total: 0, avgWpm: 0, bestAcc: 0 };
+        if (!history.length) return { total: 0, avg: 0, best: 0, weakness: "None" };
+
+        const avg = Math.round(history.reduce((a, b) => a + b.wpm, 0) / history.length);
+        const best = Math.max(...history.map(s => s.acc));
         
-        const total = history.length;
-        const avgWpm = Math.round(history.reduce((a, b) => a + b.wpm, 0) / total);
-        const bestAcc = Math.max(...history.map(s => s.acc));
-        
-        return { total, avgWpm, bestAcc };
+        // Calculate Weakness Frequency
+        const typeCounts = {};
+        history.forEach(session => {
+            if(session.missed) {
+                session.missed.forEach(type => {
+                    typeCounts[type] = (typeCounts[type] || 0) + 1;
+                });
+            }
+        });
+
+        let weakness = "None";
+        let maxCount = 0;
+        for (const [type, count] of Object.entries(typeCounts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                weakness = type;
+            }
+        }
+
+        return { total: history.length, avg, best, weakness };
     },
 
     updateUI: () => {
-        const stats = Career.getStats();
-        // Update Config Panel Stats
-        if(getEl('stat-total')) getEl('stat-total').textContent = stats.total;
-        if(getEl('stat-avg')) getEl('stat-avg').textContent = stats.avgWpm;
-        if(getEl('stat-best')) getEl('stat-best').textContent = stats.bestAcc + '%';
+        const s = Career.getStats();
+        if(getEl('stat-total')) getEl('stat-total').textContent = s.total;
+        if(getEl('stat-avg')) getEl('stat-avg').textContent = s.avg;
+        if(getEl('stat-best')) getEl('stat-best').textContent = s.best + '%';
+        if(getEl('stat-weakness')) getEl('stat-weakness').textContent = s.weakness;
     }
 };
 
@@ -257,21 +280,23 @@ getEl('finish-seq-btn').onclick = () => {
     const ers = Math.round(raw * (final/100));
 
     // SAVE STATS
-    Career.save(ers, Math.round(final));
+    let corr = 0;
+    let missedTypes = [];
+    state.quizData.questions.forEach(q => { 
+        if(state.userAnswers[q.id] === q.correctAnswer) {
+            corr++; 
+        } else {
+            // Log the type of the wrong answer
+            missedTypes.push(q.type || "General");
+        }
+    });
 
-    getEl('final-raw').textContent = raw;
-    getEl('final-acc').textContent = Math.round(final) + "%";
-    getEl('final-ers').textContent = ers;
+    // ... calculation code ...
+    const acc = (corr / state.quizData.questions.length) * 100;
+    const final = (acc * 0.6) + 40; 
+    const ers = Math.round(raw * (final/100));
     
-    getEl('coach-feedback').innerHTML = `Session Recorded to Career History.`;
-
-    getEl('vocab-container').innerHTML = (state.quizData.vocabulary || []).map(v => `
-        <div class="vocab-card">
-            <span class="vocab-term">${v.word}</span>
-            ${v.definition}
-        </div>
-    `).join('');
-    
+    Career.save(ers, Math.round(final), missedTypes);
     getEl('review-text-container').innerHTML = state.originalText;
     switchView('results-view');
 };

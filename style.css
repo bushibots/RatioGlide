@@ -283,7 +283,7 @@ body {
 }
 
 .career-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
     margin-bottom: 20px; padding: 15px;
     background: rgba(79, 70, 229, 0.04); /* Light Indigo Tint */
     border-radius: 12px; border: 1px solid rgba(79, 70, 229, 0.2);
