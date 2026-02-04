@@ -159,23 +159,38 @@ async function triggerGeneration(topic) {
 
 // READER 
 getEl('start-btn').addEventListener('click', () => {
+    // FIX: Clear old timer to prevent double-speed bug
+    if (state.intervalId) clearInterval(state.intervalId);
+
     const manual = getEl('manual-text-input').value.trim();
-    if (manual.length > 20) state.originalText = manual;
+    
+    // FIX: Allow text > 0 (was > 20), so short sentences work
+    if (manual.length > 0) state.originalText = manual;
+    
     if (!state.originalText) { alert("Please provide text."); return; }
 
     state.words = state.originalText.trim().split(/\s+/);
     state.currentWordIndex = 0;
     state.targetWPM = parseInt(getEl('speed-slider').value);
     
+    // 5. RENDER TEXT
     const container = getEl('text-container');
-    container.innerHTML = state.words.map((w,i) => `<span id="word-${i}" class="word-span">${w} </span>`).join('');
+    container.innerHTML = state.words.map((w, i) => 
+        `<span id="word-${i}" class="word">${w} </span>`
+    ).join('');
     
-    if(state.isFocusBlur) container.classList.add('blur-active');
+    // 6. APPLY MODES
+    if (state.isFocusBlur) container.classList.add('blur-active');
     else container.classList.remove('blur-active');
 
+    // 7. START SESSION
     switchView('reader-view');
     state.startTime = Date.now();
+    
+    // 8. IMMEDIATE HIGHLIGHT (Fixes "Disappearing First Word")
     updateWordHighlight(0); 
+    
+    // 9. START TICKER
     state.intervalId = setInterval(tick, 60000 / state.targetWPM);
 });
 
@@ -191,17 +206,26 @@ function tick() {
     updateWordHighlight(state.currentWordIndex);
 }
 
+/* REPLACE updateWordHighlight FUNCTION */
 function updateWordHighlight(index) {
     const curr = getEl(`word-${index}`);
     if (curr) {
-        curr.classList.add('active-word');
-        curr.scrollIntoView({behavior:'smooth', block:'center'});
+        // FIX: Use 'highlight' to match CSS, not 'active-word'
+        curr.classList.add('highlight'); 
+        // FIX: Use 'auto' to prevent jitter at high speeds
+        curr.scrollIntoView({behavior:'auto', block:'center'});
     }
     if (index > 0) {
         const prev = getEl(`word-${index-1}`);
         if (prev) {
-            prev.classList.remove('active-word');
-            prev.style.opacity = 0.4;
+            // FIX: Remove 'highlight' class
+            prev.classList.remove('highlight');
+            // FIX: Handle focus blur opacity
+            if(state.isFocusBlur) {
+                prev.style.opacity = 0.4;
+            } else {
+                prev.style.opacity = 1; 
+            }
         }
     }
 }

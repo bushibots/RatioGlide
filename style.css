@@ -375,3 +375,9 @@ body {
 .bg-global {
     background: radial-gradient(circle at center, #3b82f6 0%, #06b6d4 100%);
 }
+
+.word {
+    transition: background 0.1s, opacity 0.2s; /* Smooth highlight & fade */
+    border-radius: 4px;
+    padding: 0 2px;
+}
