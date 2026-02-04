@@ -2,30 +2,25 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RatioGlide v7.0 | Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RatioGlide v7.2 | Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="ambient-orb orb-primary"></div>
-    <div class="ambient-orb orb-secondary"></div>
-    <div class="ambient-orb orb-tertiary"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
     <nav class="glass-nav">
-        <div class="logo-container">
-            <span class="logo-icon">⚡</span>
-            <span class="logo-text">RatioGlide</span>
+        <div class="logo">
+            <span>⚡</span> RatioGlide
         </div>
-        
-        <div class="nav-actions">
+        <div class="nav-right">
             <div class="stat-pill">
-                <span id="target-wpm-disp">250</span> <span class="unit">WPM</span>
+                <span id="target-wpm-disp">250</span> WPM
             </div>
-            <button id="theme-btn" class="icon-btn" aria-label="Toggle Theme">
-                <span class="icon">🌙</span>
-            </button>
+            <button id="theme-btn" class="theme-btn">🌙</button>
         </div>
     </nav>
 
@@ -38,57 +33,46 @@
             </div>
 
             <div class="control-group">
-                <label>1. Jurisdiction & Context</label>
-                <div class="select-wrapper">
-                    <select id="country-select" class="glass-input">
-                        <option value="Global">🌍 Global / General Context</option>
-                        <option value="India" selected>🇮🇳 India (CLAT/AILET)</option>
-                        <option value="USA">🇺🇸 USA (LSAT/Bar)</option>
-                        <option value="UK">🇬🇧 UK (LNAT)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label>2. Content Source</label>
+                <label class="label">1. Context & Topic</label>
+                <select id="country-select" class="glass-input" style="margin-bottom: 12px;">
+                    <option value="Global">🌍 Global / General</option>
+                    <option value="India" selected>🇮🇳 India (CLAT)</option>
+                    <option value="USA">🇺🇸 USA (LSAT)</option>
+                    <option value="UK">🇬🇧 UK (LNAT)</option>
+                </select>
                 
-                <div class="chip-grid">
-                    <button class="chip-btn" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
-                    <button class="chip-btn" onclick="selectTopic('Logical Arguments')">🧠 Logic</button>
-                    <button class="chip-btn" onclick="selectTopic('Global Economics')">💸 Econ</button>
-                    <button class="chip-btn" onclick="selectTopic('Philosophy')">📜 Ethics</button>
+                <div class="chips">
+                    <button class="chip" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
+                    <button class="chip" onclick="selectTopic('Logical Arguments')">🧠 Logic</button>
+                    <button class="chip" onclick="selectTopic('Global Economics')">💸 Econ</button>
+                    <button class="chip" onclick="selectTopic('Philosophy')">📜 Ethics</button>
                 </div>
 
-                <div class="input-stack">
-                    <div class="ai-row">
-                        <input type="text" id="custom-topic-input" class="glass-input" placeholder="Or type a custom topic..." />
-                        <button id="ai-generate-btn" class="action-btn-small">✨ Generate</button>
-                    </div>
-                    <div class="divider"><span>OR</span></div>
-                    <textarea id="manual-text-input" class="glass-input textarea-mode" placeholder="Paste your own text here..."></textarea>
-                    
-                    <div class="file-action">
-                        <input type="file" id="file-upload" accept=".txt" class="hidden-file">
-                        <label for="file-upload" class="file-label">📂 Upload .txt File</label>
-                        <span id="file-status" class="file-status"></span>
-                    </div>
+                <div class="input-wrapper">
+                    <input type="text" id="custom-topic-input" class="glass-input" placeholder="Or type a custom topic...">
+                    <button id="ai-generate-btn" class="generate-btn">✨ Generate</button>
                 </div>
-                <p id="status-msg" class="status-indicator">System Ready</p>
             </div>
 
             <div class="control-group">
-                <label>3. Reading Dynamics</label>
-                <div class="settings-row">
-                    <div class="slider-container">
-                        <input type="range" id="speed-slider" min="100" max="1000" value="250" step="10">
-                        <div class="slider-labels">
-                            <span>Slow</span>
-                            <span>Fast</span>
-                        </div>
-                    </div>
-                    <div class="toggles">
-                        <button id="paper-mode-btn" class="toggle-pill" onclick="togglePaperMode()">📜 Paper Mode</button>
-                        <button id="focus-blur-btn" class="toggle-pill" onclick="toggleFocusBlur()">💧 Focus Blur</button>
+                <label class="label">2. Source Content</label>
+                <textarea id="manual-text-input" class="glass-input" style="height: 100px; resize: vertical;" placeholder="Paste text here..."></textarea>
+                
+                <div class="file-row" style="margin-top: 8px;">
+                    <input type="file" id="file-upload" accept=".txt" style="display: none;">
+                    <label for="file-upload" class="file-btn">📂 Upload .txt</label>
+                    <span id="file-status" class="file-msg">No file selected</span>
+                </div>
+                <p id="status-msg" style="text-align: center; margin-top: 8px; font-size: 0.9rem; opacity: 0;">Ready</p>
+            </div>
+
+            <div class="control-group">
+                <label class="label">3. Mode</label>
+                <div class="settings">
+                    <input type="range" id="speed-slider" min="100" max="800" value="250" style="width: 100%;">
+                    <div>
+                        <button id="paper-mode-btn" class="toggle" onclick="togglePaperMode()">📜 Paper Mode</button>
+                        <button id="focus-blur-btn" class="toggle" onclick="toggleFocusBlur()">💧 Focus Blur</button>
                     </div>
                 </div>
             </div>
@@ -96,87 +80,71 @@
             <button id="start-btn" class="cta-btn">Initialize Session</button>
         </section>
 
-        <section id="reader-view" class="glass-card hidden">
-            <div class="reader-header">
-                <span class="live-indicator">● Reading Live</span>
-                <button class="text-btn" onclick="location.reload()">Abort</button>
-            </div>
-            <div id="text-container" class="reader-content"></div>
+        <section id="reader-view" class="glass-card">
+            <div id="text-container" class="reader-box"></div>
         </section>
 
-        <section id="quiz-view" class="glass-card hidden centered-card">
-            <div id="ai-loader">
-                <div class="neural-spinner"></div>
-                <h3>Analyzing Comprehension</h3>
-                <p>Generating questions & logic chains...</p>
+        <section id="quiz-view" class="glass-card">
+            <div id="ai-loader" style="text-align: center; padding: 2rem;">
+                <div style="width: 40px; height: 40px; border: 4px solid var(--primary); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                <h3>Analyzing...</h3>
+                <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
             </div>
             <div id="quiz-content" class="hidden">
-                <div class="card-header">
-                    <h2>Phase 1: Comprehension</h2>
-                    <p>Select the best answer.</p>
-                </div>
+                <div class="card-header"><h2>Comprehension</h2></div>
                 <div id="question-container"></div>
             </div>
         </section>
 
-        <section id="sequence-view" class="glass-card hidden">
+        <section id="sequence-view" class="glass-card">
             <div class="card-header">
-                <h2>Phase 2: Logic Reconstruction</h2>
-                <p>Reorder the arguments chronologically.</p>
+                <h2>Logic Reconstruction</h2>
+                <p>Click items in chronological order.</p>
             </div>
-            <div id="sequence-container" class="sequence-list"></div>
-            <div class="sequence-footer">
-                <span id="sequence-feedback" class="feedback-toast"></span>
-                <button id="finish-seq-btn" class="cta-btn hidden">Finalize Analysis</button>
-            </div>
+            <div id="sequence-container"></div>
+            <p id="sequence-feedback" style="text-align: center; margin-top: 15px; font-weight: bold; color: var(--primary);">Select First Step...</p>
+            <button id="finish-seq-btn" class="cta-btn hidden">Finalize Analysis</button>
         </section>
 
-        <section id="results-view" class="glass-card hidden">
-            <div class="card-header">
-                <h2>Performance Report</h2>
-            </div>
+        <section id="results-view" class="glass-card">
+            <div class="card-header"><h2>Performance Report</h2></div>
             
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <span class="label">Effective Speed</span>
-                    <div class="value"><span id="final-ers">0</span> <small>WPM</small></div>
+            <div class="stats">
+                <div class="stat-card glow">
+                    <span class="label">Effective WPM</span>
+                    <span class="stat-val" id="final-ers">0</span>
                 </div>
                 <div class="stat-card">
                     <span class="label">Raw Speed</span>
-                    <div class="value" id="final-raw">0</div>
+                    <span class="stat-val" id="final-raw">0</span>
                 </div>
                 <div class="stat-card">
                     <span class="label">Accuracy</span>
-                    <div class="value" id="final-acc">0%</div>
+                    <span class="stat-val" id="final-acc">0%</span>
                 </div>
             </div>
 
-            <div class="analysis-box">
-                <p id="coach-feedback">Calculating...</p>
+            <div style="background: rgba(0,0,0,0.03); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                <p id="coach-feedback" style="margin: 0; font-weight: 500;">Calculating...</p>
             </div>
 
-            <div class="expandable-section">
-                <h3>📚 Advanced Vocabulary</h3>
-                <div id="vocab-container" class="vocab-list"></div>
-            </div>
+            <label class="label">Advanced Vocabulary</label>
+            <div id="vocab-container" class="vocab-grid"></div>
+            
+            <label class="label" style="margin-top: 20px;">Passage Review</label>
+            <div id="review-text-container" class="review-box"></div>
 
-            <div class="expandable-section">
-                <h3>🔍 Passage Review</h3>
-                <p class="hint">Highlight text to define or search.</p>
-                <div id="review-text-container" class="review-box"></div>
-            </div>
-
-            <button id="restart-btn" class="secondary-btn">Start New Session</button>
+            <button id="restart-btn" class="restart-btn">Start New Session</button>
         </section>
 
     </main>
 
-    <div id="lookup-tooltip" class="tooltip-card">
-        <div class="tooltip-header">
-            <span id="tt-word">Word</span>
-            <a id="tt-link" href="#" target="_blank" class="external-link">↗</a>
+    <div id="lookup-tooltip" class="tooltip">
+        <div class="tooltip-head">
+            <span id="tt-word" class="tooltip-term">Word</span>
+            <a id="tt-link" href="#" target="_blank" class="tooltip-link">↗</a>
         </div>
-        <p id="tt-def" class="tooltip-body">Loading...</p>
+        <div id="tt-def" style="font-size: 0.9rem; line-height: 1.4;">Definition...</div>
     </div>
 
     <script src="script.js"></script>
