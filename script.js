@@ -1,4 +1,4 @@
-/* RatioGlide v7.2 - Logic Patch */
+/* RatioGlide v7.5 - Stable Core */
 const state = {
     targetWPM: 250, words: [], originalText: "", currentWordIndex: 0, intervalId: null, 
     startTime: 0, endTime: 0, quizData: null, userAnswers: {}, userSequence: [], correctSequence: [],
@@ -7,21 +7,15 @@ const state = {
 
 const getEl = (id) => document.getElementById(id);
 
-// --- VIEW NAV ---
+// --- VIEW CONTROLLER ---
 function switchView(viewId) {
-    document.querySelectorAll('.glass-card').forEach(el => {
-        el.classList.remove('active');
-        setTimeout(() => el.style.display = 'none', 400); // Sync with CSS transition time
-    });
+    document.querySelectorAll('.card').forEach(el => el.classList.remove('active'));
     const target = getEl(viewId);
-    target.style.display = 'block';
-    // Force Reflow
-    void target.offsetWidth;
     target.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- CONFIG ---
+// --- CONFIGURATION ---
 window.selectTopic = (topic) => {
     document.querySelectorAll('.chip').forEach(btn => btn.classList.remove('selected'));
     event.target.classList.add('selected');
@@ -38,12 +32,12 @@ getEl('file-upload').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
     getEl('file-status').textContent = file.name;
-    getEl('file-status').style.color = "var(--success)";
+    getEl('file-status').style.color = "var(--primary)";
     
     const reader = new FileReader();
     reader.onload = (evt) => {
         getEl('manual-text-input').value = evt.target.result;
-        state.originalText = ""; // Clear AI text
+        state.originalText = ""; 
     };
     reader.readAsText(file);
 });
@@ -52,22 +46,22 @@ getEl('file-upload').addEventListener('change', (e) => {
 window.togglePaperMode = () => {
     state.isPaperMode = !state.isPaperMode;
     document.body.classList.toggle('paper-mode', state.isPaperMode);
-    getEl('paper-mode-btn').classList.toggle('active', state.isPaperMode);
 };
 window.toggleFocusBlur = () => {
     state.isFocusBlur = !state.isFocusBlur;
-    getEl('focus-blur-btn').classList.toggle('active', state.isFocusBlur);
+    const btn = getEl('focus-blur-btn');
+    btn.style.backgroundColor = state.isFocusBlur ? "var(--primary)" : "";
+    btn.style.color = state.isFocusBlur ? "white" : "";
 };
 
-// API
+// --- API ---
 async function triggerGeneration(topic) {
     const status = getEl('status-msg');
     const country = getEl('country-select').value;
     const btn = getEl('ai-generate-btn');
 
     status.style.opacity = 1;
-    status.textContent = `Drafting "${topic}" (${country})...`;
-    status.style.color = "var(--text-muted)";
+    status.textContent = `Writing "${topic}" (${country})...`;
     btn.textContent = "⏳";
     btn.disabled = true;
 
@@ -81,30 +75,29 @@ async function triggerGeneration(topic) {
         state.originalText = data.text;
         getEl('manual-text-input').value = "";
         
-        status.textContent = "Content Ready.";
-        status.style.color = "#10b981"; // Success Green
-        btn.textContent = "✨ Generate";
+        status.textContent = "Content Generated Successfully.";
+        btn.textContent = "Generate";
         btn.disabled = false;
     } catch (e) {
-        status.textContent = "Error: Check Server.";
+        status.textContent = "Server Error. Check console.";
         status.style.color = "red";
-        btn.textContent = "❌ Retry";
+        btn.textContent = "Retry";
         btn.disabled = false;
     }
 }
 
-// READER (FIXED VISIBILITY)
+// --- READER ---
 getEl('start-btn').addEventListener('click', () => {
     const manual = getEl('manual-text-input').value.trim();
     if (manual.length > 20) state.originalText = manual;
-    if (!state.originalText) { alert("Please provide text."); return; }
+    if (!state.originalText) { alert("Please provide text first."); return; }
 
     state.words = state.originalText.trim().split(/\s+/);
     state.currentWordIndex = 0;
     state.targetWPM = parseInt(getEl('speed-slider').value);
     
     const container = getEl('text-container');
-    container.innerHTML = state.words.map((w,i) => `<span id="word-${i}" class="word-span">${w} </span>`).join('');
+    container.innerHTML = state.words.map((w,i) => `<span id="word-${i}" class="word">${w} </span>`).join('');
     
     if(state.isFocusBlur) container.classList.add('blur-active');
     else container.classList.remove('blur-active');
@@ -112,8 +105,8 @@ getEl('start-btn').addEventListener('click', () => {
     switchView('reader-view');
     state.startTime = Date.now();
     
-    // IMMEDIATE UPDATE (Fixes "Disappearing Paragraph")
-    updateWordHighlight(0); 
+    // Highlight First Word Immediately
+    updateHighlight(0);
     
     state.intervalId = setInterval(tick, 60000 / state.targetWPM);
 });
@@ -127,25 +120,21 @@ function tick() {
         generateQuiz();
         return;
     }
-    updateWordHighlight(state.currentWordIndex);
+    updateHighlight(state.currentWordIndex);
 }
 
-function updateWordHighlight(index) {
+function updateHighlight(index) {
     const curr = getEl(`word-${index}`);
     if (curr) {
-        curr.classList.add('active-word');
+        curr.classList.add('highlight');
         curr.scrollIntoView({behavior:'smooth', block:'center'});
     }
     if (index > 0) {
-        const prev = getEl(`word-${index-1}`);
-        if (prev) {
-            prev.classList.remove('active-word');
-            prev.style.opacity = 0.4;
-        }
+        getEl(`word-${index-1}`).classList.remove('highlight');
     }
 }
 
-// QUIZ
+// --- QUIZ ---
 async function generateQuiz() {
     try {
         const res = await fetch('/api/generate-quiz', {
@@ -155,19 +144,19 @@ async function generateQuiz() {
         state.quizData = await res.json();
         state.correctSequence = [...state.quizData.sequence];
         renderQuiz();
-    } catch (e) { alert("Quiz Gen Failed"); }
+    } catch (e) { alert("Quiz Failed to Load"); }
 }
 
 function renderQuiz() {
     getEl('ai-loader').style.display = 'none';
-    getEl('quiz-content').classList.remove('hidden');
+    getEl('quiz-content').style.display = 'block';
     
     getEl('question-container').innerHTML = state.quizData.questions.map(q => `
-        <div class="q-box">
+        <div class="question-card">
             <h3 style="margin-top:0">${q.questionText}</h3>
-            ${q.options.map(opt => `<button class="q-opt" onclick="selAns(${q.id}, '${opt.replace(/'/g, "\\'")}', this)">${opt}</button>`).join('')}
+            ${q.options.map(opt => `<button class="option-btn" onclick="selAns(${q.id}, '${opt.replace(/'/g, "\\'")}', this)">${opt}</button>`).join('')}
         </div>
-    `).join('') + `<button class="cta-btn" onclick="startSeq()">Next Phase &rarr;</button>`;
+    `).join('') + `<button class="btn-full" onclick="startSeq()">Next Phase</button>`;
 }
 
 window.selAns = (id, ans, btn) => {
@@ -176,13 +165,13 @@ window.selAns = (id, ans, btn) => {
     btn.classList.add('selected');
 };
 
-// SEQUENCE
+// --- SEQUENCE ---
 window.startSeq = () => {
     switchView('sequence-view');
     state.userSequence = [];
     const shuf = [...state.correctSequence].sort(() => 0.5 - Math.random());
-    getEl('sequence-container').innerHTML = shuf.map(t => `<div class="seq-item" onclick="clickSeq('${t.replace(/'/g, "\\'")}', this)">${t}<span class="seq-idx"></span></div>`).join('');
-    getEl('finish-seq-btn').classList.add('hidden');
+    getEl('sequence-container').innerHTML = shuf.map(t => `<div class="seq-item" onclick="clickSeq('${t.replace(/'/g, "\\'")}', this)">${t}<div class="seq-num"></div></div>`).join('');
+    getEl('finish-seq-btn').style.display = 'none';
 };
 
 window.clickSeq = (txt, el) => {
@@ -190,11 +179,11 @@ window.clickSeq = (txt, el) => {
     const idx = state.userSequence.length;
     if (txt === state.correctSequence[idx]) {
         el.classList.add('correct');
-        el.querySelector('.seq-idx').textContent = idx + 1;
+        el.querySelector('.seq-num').textContent = idx + 1;
         state.userSequence.push(txt);
         if (state.userSequence.length === state.correctSequence.length) {
             getEl('sequence-feedback').textContent = "Complete!";
-            getEl('finish-seq-btn').classList.remove('hidden');
+            getEl('finish-seq-btn').style.display = 'block';
         }
     } else {
         el.classList.add('wrong');
@@ -202,7 +191,7 @@ window.clickSeq = (txt, el) => {
     }
 };
 
-// RESULTS
+// --- RESULTS ---
 getEl('finish-seq-btn').onclick = () => {
     const mins = (state.endTime - state.startTime) / 60000;
     const raw = Math.round(state.words.length / mins) || 0;
@@ -210,16 +199,14 @@ getEl('finish-seq-btn').onclick = () => {
     let corr = 0;
     state.quizData.questions.forEach(q => { if(state.userAnswers[q.id] === q.correctAnswer) corr++; });
     const acc = (corr / state.quizData.questions.length) * 100;
-    const final = (acc * 0.6) + 40; // 40pts for sequence
-    const ers = Math.round(raw * (final/100));
+    const ers = Math.round(raw * (acc/100));
 
     getEl('final-raw').textContent = raw;
-    getEl('final-acc').textContent = Math.round(final) + "%";
+    getEl('final-acc').textContent = Math.round(acc) + "%";
     getEl('final-ers').textContent = ers;
     
-    // Grid Vocab
     getEl('vocab-container').innerHTML = (state.quizData.vocabulary || []).map(v => `
-        <div class="vocab-card">
+        <div class="vocab-item">
             <span class="vocab-term">${v.word}</span>
             ${v.definition}
         </div>
@@ -229,7 +216,7 @@ getEl('finish-seq-btn').onclick = () => {
     switchView('results-view');
 };
 
-// TOOLTIP
+// --- TOOLTIP ---
 const tt = getEl('lookup-tooltip');
 document.addEventListener('mouseup', async () => {
     const sel = window.getSelection();
@@ -239,20 +226,15 @@ document.addEventListener('mouseup', async () => {
     }
     
     const rect = sel.getRangeAt(0).getBoundingClientRect();
-    const ttW = 260;
-    const left = rect.left + (rect.width/2) - (ttW/2);
-    
-    tt.style.left = `${left}px`;
+    tt.style.left = `${rect.left + (rect.width/2) - 125}px`;
     tt.style.top = `${rect.bottom + window.scrollY + 10}px`;
     tt.classList.add('visible');
     
     getEl('tt-word').textContent = txt;
     getEl('tt-def').textContent = "...";
-    
-    const isPhrase = txt.split(' ').length > 2;
     getEl('tt-link').href = `https://www.google.com/search?q=${encodeURIComponent(txt)}`;
     
-    if(!isPhrase) {
+    if(txt.split(' ').length < 3) {
         try {
             const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${txt}`);
             const d = await r.json();
