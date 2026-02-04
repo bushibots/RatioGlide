@@ -265,13 +265,29 @@ body {
    7. TOOLTIP (FIXED)
    ========================================= */
 .tooltip {
-    position: absolute; z-index: 9999;
-    background: #1e293b; color: white;
-    padding: 15px; border-radius: 8px; width: 250px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    position: absolute;
+    z-index: 10000 !important; /* Force it above cards */
+    background: #1e293b;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 250px;
+    pointer-events: auto; /* Allow clicking the link */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
-.tooltip.visible { opacity: 1; pointer-events: auto; }
+.tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.review-box::selection {
+    background-color: var(--accent);
+    color: black;
+}
+
 .tt-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
 .tt-term { color: #818cf8; font-weight: bold; }
 .tt-link { color: #22d3ee; text-decoration: none; font-size: 1.2rem; font-weight: bold; }
@@ -380,4 +396,15 @@ body {
     transition: background 0.1s, opacity 0.2s; /* Smooth highlight & fade */
     border-radius: 4px;
     padding: 0 2px;
+}
+
+.text-area span {
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.highlight {
+    background-color: var(--accent) !important;
+    color: #000 !important;
+    filter: blur(0) !important; /* Force reveal */
+    opacity: 1 !important;      /* Force reveal */
 }
