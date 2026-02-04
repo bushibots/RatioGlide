@@ -1,0 +1,6 @@
+# Security: Never upload API keys
+.env
+
+# Dependencies: Never upload 200MB of libraries
+node_modules/
+.DS_Store

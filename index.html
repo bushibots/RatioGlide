@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RatioGlide v5.0</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="ambient-light orb-1"></div>
+    <div class="ambient-light orb-2"></div>
+
+    <header class="navbar">
+        <div class="logo">RatioGlide <span style="font-size:0.5em; opacity:0.6">v5.0</span></div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div class="stat-item">
+                <span id="target-wpm-disp">250</span> WPM
+            </div>
+            <button id="theme-btn" class="theme-switch">🌙 Dark</button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        
+        <section id="config-panel" class="card active">
+            <div class="section-block">
+                <label>1. Select Topic Source</label>
+                <div class="topic-grid">
+                    <button class="topic-btn" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
+                    <button class="topic-btn" onclick="selectTopic('Logical Arguments')">🧠 Logical</button>
+                    <button class="topic-btn" onclick="selectTopic('Global Economics')">🌍 Economy</button>
+                    <button class="topic-btn" onclick="selectTopic('Philosophy & Ethics')">📜 Ethics</button>
+                </div>
+                
+                <div class="custom-gen-box">
+                    <input type="text" id="custom-topic-input" placeholder="Or type any topic (e.g. 'Space Law')..." />
+                    <button id="ai-generate-btn" class="icon-btn">✨ Generate</button>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <label>2. Target Speed (WPM)</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                    <input type="range" id="speed-slider" min="150" max="800" value="250" step="10">
+                    <span id="slider-val" style="font-weight: bold; width: 50px;">250</span>
+                </div>
+            </div>
+            
+            <button id="start-btn" class="primary-btn">Initialize Session</button>
+            <p id="status-msg" style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: var(--accent); opacity: 0;">Loading...</p>
+        </section>
+
+        <section id="reader-view" class="card hidden">
+            <div id="text-container" class="text-content"></div>
+        </section>
+
+        <section id="quiz-view" class="card hidden">
+            <div id="ai-loader" class="hidden" style="text-align: center; padding: 2rem;">
+                <div class="loader-spinner"></div>
+                <h3>Evaluating Performance...</h3>
+            </div>
+            <div id="quiz-content">
+                <h2>Deep Analysis</h2>
+                <div id="question-container"></div>
+            </div>
+        </section>
+
+        <section id="sequence-view" class="card hidden">
+            <h2>Phase 2: Logic Chain</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Reconstruct the argument. Click the sentences in the <b>correct logical order</b>.
+            </p>
+            <div id="sequence-container" class="sequence-grid"></div>
+            <div id="sequence-feedback" class="feedback-mini"></div>
+            <button id="finish-seq-btn" class="primary-btn hidden">Finalize Score</button>
+        </section>
+
+        <section id="results-view" class="card hidden">
+            <h2>Session Report</h2>
+            
+            <div class="score-grid">
+                <div class="score-card main-score">
+                    <h3>Effective Speed</h3>
+                    <div class="big-number" id="final-ers">0</div>
+                    <span class="unit">WPM</span>
+                </div>
+                <div class="stats-row">
+                    <div class="score-card small">
+                        <h3>Raw Speed</h3>
+                        <div class="number" id="final-raw">0</div>
+                    </div>
+                    <div class="score-card small">
+                        <h3>Accuracy</h3>
+                        <div class="number" id="final-acc">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-box">
+                <p id="coach-feedback" class="feedback-text">...</p>
+            </div>
+
+            <div class="vocab-section">
+                <h3>📚 Key Vocabulary</h3>
+                <div id="vocab-container" class="vocab-grid"></div>
+            </div>
+
+            <div class="review-section">
+                <h3>🔍 Passage Review</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">
+                    Highlight any word to define it (from Dictionary API).
+                </p>
+                <div id="review-text-container" class="review-text-box"></div>
+            </div>
+
+            <button id="restart-btn" class="secondary-btn" style="margin-top: 20px;">New Session</button>
+        </section>
+
+    </main>
+
+    <div id="lookup-tooltip" class="hidden">
+        <div class="tooltip-content">
+            <h4 id="tt-word">Word</h4>
+            <p id="tt-def">Definition...</p>
+            <a id="tt-link" href="#" target="_blank">Search Google &rarr;</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
