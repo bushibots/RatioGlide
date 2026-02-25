@@ -86,9 +86,10 @@ async function callGeminiText(key, category, country) {
         specificInstruction = `Write a dense, academic passage about "${category}" in the context of ${country}.`;
     }
 
-    const prompt = `
+   const prompt = `
         ACT AS AN EXAM SETTER (CLAT/LSAT level).
         ${specificInstruction}
+        IMPORTANT: Make this passage highly unique. Choose a specific, uncommon sub-topic, historical event, or niche scenario so the content is completely different from previous requests.
         
         Constraints:
         - Length: 350-450 words.
@@ -99,7 +100,12 @@ async function callGeminiText(key, category, country) {
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({ 
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 0.95 // High temperature forces the AI to be creative and not repeat itself
+            }
+        })
     });
 
     if (!response.ok) throw new Error(`Gemini API Error: ${response.statusText}`);

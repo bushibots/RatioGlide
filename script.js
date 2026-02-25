@@ -2,7 +2,7 @@
 const state = {
     targetWPM: 250, words: [], originalText: "", currentWordIndex: 0, intervalId: null, 
     startTime: 0, endTime: 0, quizData: null, userAnswers: {}, userSequence: [], correctSequence: [],
-    isPaperMode: false, isFocusBlur: false
+    isPaperMode: false, isFocusBlur: false, isChunkMode: false, isRecallMode: false // Added isRecallMode
 };
 
 const getEl = (id) => document.getElementById(id);
@@ -137,21 +137,35 @@ getEl('start-btn').addEventListener('click', () => {
     if (!state.originalText) { alert("Please provide text."); return; }
 
     // 3. Prepare Content (Neural Chunking vs Single Word)
-    const rawWords = state.originalText.trim().split(/\s+/);
+    // 3. Prepare Content (Detect Paragraphs for Recall Mode)
+    const paragraphs = state.originalText.trim().split(/\n+/);
+    let rawWords = [];
+    paragraphs.forEach((p, index) => {
+        rawWords.push(...p.trim().split(/\s+/));
+        // Inject a secret pause token at the end of the paragraph if Recall is ON
+        if (state.isRecallMode && index < paragraphs.length - 1) {
+            rawWords.push('[RECALL_PAUSE]');
+        }
+    });
     
     if (state.isChunkMode) {
-        // Smart Chunking: Groups up to 3 words, but breaks early at natural punctuation
         state.words = [];
         let currentChunk = [];
         for (let w of rawWords) {
+            if (w === '[RECALL_PAUSE]') {
+                if (currentChunk.length > 0) {
+                    state.words.push(currentChunk.join(' '));
+                    currentChunk = [];
+                }
+                state.words.push(w);
+                continue;
+            }
             currentChunk.push(w);
-            // Break chunk if we hit 3 words OR if the word ends with punctuation
             if (currentChunk.length >= 3 || /[.,!?;:]$/.test(w) || w.includes('-')) {
                 state.words.push(currentChunk.join(' '));
                 currentChunk = [];
             }
         }
-        // Push any remaining words
         if (currentChunk.length > 0) state.words.push(currentChunk.join(' '));
     } else {
         state.words = rawWords;
@@ -162,9 +176,10 @@ getEl('start-btn').addEventListener('click', () => {
     
     // 4. Render to Container
     const container = getEl('text-container');
-    container.innerHTML = state.words.map((w, i) => 
-        `<span id="word-${i}" class="word">${w} </span>`
-    ).join('');
+    container.innerHTML = state.words.map((w, i) => {
+        if (w === '[RECALL_PAUSE]') return `<span id="word-${i}" style="display:none;"></span>`;
+        return `<span id="word-${i}" class="word">${w} </span>`;
+    }).join('');
     
     // 5. Apply Mode Classes
     if (state.isFocusBlur) container.classList.add('blur-active');
@@ -198,6 +213,14 @@ window.toggleChunkMode = () => {
 };
 
 function tick() {
+    if (state.words[state.currentWordIndex] === '[RECALL_PAUSE]') {
+        clearInterval(state.intervalId);
+        getEl('recall-input').value = ""; // Clear previous summary
+        getEl('recall-modal').style.display = 'flex';
+        state.currentWordIndex++; // Skip the token for when we resume
+        return;
+    }
+
     state.currentWordIndex++;
     if (state.currentWordIndex >= state.words.length) {
         clearInterval(state.intervalId);
@@ -380,3 +403,14 @@ function createChunks(words, size = 3) {
     return chunks;
 }
 
+window.toggleRecallMode = () => {
+    state.isRecallMode = !state.isRecallMode;
+    getEl('recall-mode-btn').classList.toggle('active', state.isRecallMode);
+};
+
+window.resumeFromRecall = () => {
+    getEl('recall-modal').style.display = 'none';
+    const multiplier = state.isChunkMode ? 3 : 1;
+    state.intervalId = setInterval(tick, (60000 / state.targetWPM) * multiplier);
+    tick(); // Show the next word immediately
+};

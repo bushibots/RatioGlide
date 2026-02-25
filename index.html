@@ -89,7 +89,8 @@
                 <input type="range" id="speed-slider" min="10" max="800" value="250" style="flex:1;">
                 <button id="paper-mode-btn" class="file-btn" onclick="togglePaperMode()">📜 Paper</button>
                 <button id="focus-blur-btn" class="file-btn" onclick="toggleFocusBlur()">💧 Blur</button>
-                <button id="chunk-mode-btn" class="file-btn" onclick="toggleChunkMode()">🧩 Chunk</button>    
+                <button id="chunk-mode-btn" class="file-btn" onclick="toggleChunkMode()">🧩 Chunk</button>
+                <button id="recall-mode-btn" class="file-btn" onclick="toggleRecallMode()">🧠 Recall</button>    
             </div>
             
             <button id="start-btn" class="btn-full">Start Reading Session</button>
@@ -160,6 +161,14 @@
             <a id="tt-link" href="#" target="_blank" class="tt-link">↗</a>
         </div>
         <div id="tt-def" style="line-height:1.4; font-size:0.9rem;">Definition...</div>
+    </div>
+    <div id="recall-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content card">
+            <h2 class="card-title">Active Recall</h2>
+            <p class="card-subtitle">Summarize the paragraph you just read in one sentence.</p>
+            <textarea id="recall-input" class="input-box" style="height:80px; resize:none;" placeholder="This paragraph argues that..."></textarea>
+            <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="resumeFromRecall()">Submit & Resume</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
