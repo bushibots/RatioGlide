@@ -67,9 +67,9 @@ function switchView(viewId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-window.selectTopic = (topic) => {
+window.selectTopic = (topic, btnElement) => {
     document.querySelectorAll('.chip').forEach(btn => btn.classList.remove('selected'));
-    event.target.classList.add('selected');
+    if (btnElement) btnElement.classList.add('selected');
     getEl('custom-topic-input').value = topic;
     const genBtn = getEl('ai-generate-btn');
     genBtn.style.transform = "scale(1.1)";
@@ -140,11 +140,19 @@ getEl('start-btn').addEventListener('click', () => {
     const rawWords = state.originalText.trim().split(/\s+/);
     
     if (state.isChunkMode) {
-        // Groups words into meaningful phrases of 3
+        // Smart Chunking: Groups up to 3 words, but breaks early at natural punctuation
         state.words = [];
-        for (let i = 0; i < rawWords.length; i += 3) {
-            state.words.push(rawWords.slice(i, i + 3).join(' '));
+        let currentChunk = [];
+        for (let w of rawWords) {
+            currentChunk.push(w);
+            // Break chunk if we hit 3 words OR if the word ends with punctuation
+            if (currentChunk.length >= 3 || /[.,!?;:]$/.test(w) || w.includes('-')) {
+                state.words.push(currentChunk.join(' '));
+                currentChunk = [];
+            }
         }
+        // Push any remaining words
+        if (currentChunk.length > 0) state.words.push(currentChunk.join(' '));
     } else {
         state.words = rawWords;
     }
@@ -308,7 +316,7 @@ document.addEventListener('mouseup', async () => {
     const reviewBox = getEl('review-text-container');
     
     // Only trigger if text is selected inside the Review Box
-    if (!txt || !reviewBox.contains(sel.anchorNode.parentElement)) {
+    if (!txt || !sel.anchorNode || !sel.anchorNode.parentElement || !reviewBox.contains(sel.anchorNode.parentElement)) {
         tt.classList.remove('visible'); 
         return;
     }
@@ -340,7 +348,11 @@ document.addEventListener('mouseup', async () => {
     }
 });
 
-getEl('speed-slider').oninput = (e) => getEl('target-wpm-disp').textContent = e.target.value;
+getEl('speed-slider').oninput = (e) => {
+    getEl('target-wpm-disp').textContent = e.target.value;
+    const sliderDisp = getEl('slider-wpm-disp');
+    if(sliderDisp) sliderDisp.textContent = e.target.value;
+};
 getEl('restart-btn').onclick = () => location.reload();
 getEl('theme-btn').onclick = () => {
     const r = document.documentElement;

@@ -52,10 +52,10 @@
             <label class="label">1. Source & Context</label>
 
             <div class="chip-container">
-                <button class="chip" onclick="selectTopic('Legal Reasoning')">⚖️ Legal</button>
-                <button class="chip" onclick="selectTopic('Logical Arguments')">🧠 Logic</button>
-                <button class="chip" onclick="selectTopic('Global Economics')">💸 Econ</button>
-                <button class="chip" onclick="selectTopic('Philosophy')">📜 Ethics</button>
+                <button class="chip" onclick="selectTopic('Legal Reasoning', this)">⚖️ Legal</button>
+                <button class="chip" onclick="selectTopic('Logical Arguments', this)">🧠 Logic</button>
+                <button class="chip" onclick="selectTopic('Global Economics', this)">💸 Econ</button>
+                <button class="chip" onclick="selectTopic('Philosophy', this)">📜 Ethics</button>
             </div>
 
             <div class="input-row">
@@ -84,7 +84,7 @@
             <label class="label">Target Speed</label>
             <div style="display:flex; gap:10px; align-items:center;">
                 <div class="wpm-badge">
-                <span id="target-wpm-disp">10</span> WPM
+                <span id="slider-wpm-disp">250</span> WPM
             </div>
                 <input type="range" id="speed-slider" min="10" max="800" value="250" style="flex:1;">
                 <button id="paper-mode-btn" class="file-btn" onclick="togglePaperMode()">📜 Paper</button>
