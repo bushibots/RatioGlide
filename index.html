@@ -3,112 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RatioGlide v7.5 | Fixed</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>RatioGlide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
     <div id="flag-overlay" class="flag-overlay"></div>
 
-    <nav class="navbar">
-        <div class="logo"><span>⚡</span> RatioGlide</div>
-        <div class="nav-controls">
-            <div class="wpm-badge">
-                <span id="target-wpm-disp">250</span> WPM
+    <header class="site-header">
+        <nav class="navbar">
+            <div class="logo"><span>◉</span> RatioGlide</div>
+            <div class="nav-controls">
+                <div class="wpm-badge"><span id="target-wpm-disp">250</span> WPM</div>
+                <button id="theme-btn" class="theme-btn" aria-label="Toggle theme">🌙</button>
             </div>
-            <button id="theme-btn" class="theme-btn">🌙</button>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
     <main class="container">
-        
         <section id="config-panel" class="card active">
-    <h2 class="card-title">Performance Stats</h2>
-    
-    <div class="career-grid">
-        <div class="career-stat">
-            <span class="label">Reads</span>
-            <span id="stat-total" class="career-val">0</span>
-        </div>
-        <div class="career-stat">
-            <span class="label">Avg Speed</span>
-            <span id="stat-avg" class="career-val">0</span>
-        </div>
-        <div class="career-stat">
-            <span class="label">Best Acc</span>
-            <span id="stat-best" class="career-val">0%</span>
-        </div>
-        <div class="career-stat" style="border-left: 1px solid rgba(79, 70, 229, 0.2);">
-            <span class="label">Focus On</span>
-            <span id="stat-weakness" class="career-val" style="color: #ef4444; font-size: 1rem;">None</span>
-        </div>
-    </div>
+            <div class="hero-strip">
+                <h1>Read faster. Understand deeper.</h1>
+                <p>Build a focused reading flow with adaptive pace and post-session insight.</p>
+            </div>
 
-            
-            <h2 class="card-title">Setup Session</h2>
-    <p class="card-subtitle">Choose your content and reading preferences.</p>
+            <h2 class="card-title">Performance Stats</h2>
+            <div class="career-grid">
+                <div class="career-stat"><span class="label">Reads</span><span id="stat-total" class="career-val">0</span></div>
+                <div class="career-stat"><span class="label">Avg Speed</span><span id="stat-avg" class="career-val">0</span></div>
+                <div class="career-stat"><span class="label">Best Acc</span><span id="stat-best" class="career-val">0%</span></div>
+                <div class="career-stat stat-focus"><span class="label">Focus On</span><span id="stat-weakness" class="career-val focus-text">None</span></div>
+            </div>
 
-            <label class="label">1. Source & Context</label>
+            <h2 class="card-title">Session Setup</h2>
+            <p class="card-subtitle">Choose a source and tune the reading experience.</p>
 
+            <label class="label">1. Topic</label>
             <div class="chip-container">
-                <button class="chip" onclick="selectTopic('Legal Reasoning', this)">⚖️ Legal</button>
-                <button class="chip" onclick="selectTopic('Logical Arguments', this)">🧠 Logic</button>
-                <button class="chip" onclick="selectTopic('Global Economics', this)">💸 Econ</button>
-                <button class="chip" onclick="selectTopic('Philosophy', this)">📜 Ethics</button>
+                <button class="chip" onclick="selectTopic('Legal Reasoning', this)">Legal</button>
+                <button class="chip" onclick="selectTopic('Logical Arguments', this)">Logic</button>
+                <button class="chip" onclick="selectTopic('Global Economics', this)">Economics</button>
+                <button class="chip" onclick="selectTopic('Philosophy', this)">Philosophy</button>
             </div>
 
             <div class="input-row">
-                <select id="country-select" class="input-box" style="flex:1;">
-                    <option value="Global">🌍 Global</option>
-                    <option value="India" selected>🇮🇳 India</option>
-                    <option value="USA">🇺🇸 USA</option>
-                    <option value="UK">🇬🇧 UK</option>
+                <select id="country-select" class="input-box country-select">
+                    <option value="Global">Global</option>
+                    <option value="India" selected>India</option>
+                    <option value="USA">USA</option>
+                    <option value="UK">UK</option>
                 </select>
-                <input type="text" id="custom-topic-input" class="input-box" style="flex:2;" placeholder="Custom topic...">
+                <input type="text" id="custom-topic-input" class="input-box" placeholder="Custom topic">
                 <button id="ai-generate-btn" class="btn-primary">Generate</button>
             </div>
 
             <label class="label">2. Content Input</label>
-            <textarea id="manual-text-input" class="input-box" style="height:100px; resize:vertical;" placeholder="Or paste text here..."></textarea>
-            
+            <textarea id="manual-text-input" class="input-box content-input" placeholder="Paste your own text"></textarea>
+
             <div class="file-row">
                 <div>
-                    <input type="file" id="file-upload" accept=".txt" style="display:none;">
-                    <label for="file-upload" class="file-btn">📂 Upload Text File</label>
+                    <input type="file" id="file-upload" accept=".txt" class="hidden-input">
+                    <label for="file-upload" class="file-btn">Upload Text File</label>
                 </div>
                 <span id="file-status" class="file-status">No file chosen</span>
             </div>
-            <p id="status-msg" style="text-align:center; margin-top:10px; font-size:0.9rem; color:var(--primary); opacity:0;">Ready</p>
-            
+            <p id="status-msg" class="status-msg">Ready</p>
+
             <label class="label">Target Speed</label>
-            <div style="display:flex; gap:10px; align-items:center;">
-                <div class="wpm-badge">
-                <span id="slider-wpm-disp">250</span> WPM
+            <div class="speed-row">
+                <div class="wpm-badge"><span id="slider-wpm-disp">250</span> WPM</div>
+                <input type="range" id="speed-slider" min="10" max="800" value="250" class="speed-slider">
             </div>
-                <input type="range" id="speed-slider" min="10" max="800" value="250" style="flex:1;">
-                <button id="paper-mode-btn" class="file-btn" onclick="togglePaperMode()">📜 Paper</button>
-                <button id="focus-blur-btn" class="file-btn" onclick="toggleFocusBlur()">💧 Blur</button>
-                <button id="chunk-mode-btn" class="file-btn" onclick="toggleChunkMode()">🧩 Chunk</button>
-                <button id="recall-mode-btn" class="file-btn" onclick="toggleRecallMode()">🧠 Recall</button>    
+
+            <div class="toggle-row">
+                <button id="paper-mode-btn" class="file-btn" onclick="togglePaperMode()">Paper</button>
+                <button id="focus-blur-btn" class="file-btn" onclick="toggleFocusBlur()">Focus Blur</button>
+                <button id="chunk-mode-btn" class="file-btn" onclick="toggleChunkMode()">Chunk Mode: OFF</button>
+                <button id="recall-mode-btn" class="file-btn" onclick="toggleRecallMode()">Recall</button>
             </div>
-            
-            <button id="start-btn" class="btn-full">Start Reading Session</button>
+
+            <button id="start-btn" class="btn-full">Start Session</button>
         </section>
 
         <section id="reader-view" class="card">
             <h2 class="card-title">Reading Phase</h2>
-            <p class="card-subtitle">Focus on the highlighted text.</p>
+            <p class="card-subtitle">Follow the highlight and keep steady rhythm.</p>
             <div id="text-container" class="text-area"></div>
         </section>
 
         <section id="quiz-view" class="card">
-            <div id="ai-loader" style="text-align:center; padding:30px;">
-                <div style="width:40px; height:40px; border:4px solid var(--primary); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
-                <p style="margin-top:15px; font-weight:600;">Analyzing Text...</p>
-                <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+            <div id="ai-loader" class="ai-loader">
+                <div class="loader-spinner"></div>
+                <p>Analyzing text...</p>
             </div>
-            <div id="quiz-content" style="display:none;">
+            <div id="quiz-content" class="hidden">
                 <h2 class="card-title">Comprehension</h2>
                 <div id="question-container"></div>
             </div>
@@ -116,33 +106,22 @@
 
         <section id="sequence-view" class="card">
             <h2 class="card-title">Logic Chain</h2>
-            <p class="card-subtitle">Reconstruct the argument order.</p>
+            <p class="card-subtitle">Reconstruct the argument in order.</p>
             <div id="sequence-container"></div>
-            <p id="sequence-feedback" style="text-align:center; margin-top:10px; font-weight:bold; color:var(--primary);">Select First Step</p>
-            <button id="finish-seq-btn" class="btn-full" style="display:none;">View Report</button>
+            <p id="sequence-feedback" class="sequence-feedback">Select First Step</p>
+            <button id="finish-seq-btn" class="btn-full hidden">View Report</button>
         </section>
 
         <section id="results-view" class="card">
             <h2 class="card-title">Performance Analysis</h2>
-            
+
             <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-num" id="final-ers">0</span>
-                    <span class="stat-label">Effective WPM</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="final-raw">0</span>
-                    <span class="stat-label">Raw Speed</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="final-acc">0%</span>
-                    <span class="stat-label">Accuracy</span>
-                </div>
+                <div class="stat-box"><span class="stat-num" id="final-ers">0</span><span class="stat-label">Effective WPM</span></div>
+                <div class="stat-box"><span class="stat-num" id="final-raw">0</span><span class="stat-label">Raw Speed</span></div>
+                <div class="stat-box"><span class="stat-num" id="final-acc">0%</span><span class="stat-label">Accuracy</span></div>
             </div>
 
-            <div style="background:var(--bg-body); padding:15px; border-radius:8px; text-align:center; margin-bottom:20px;">
-                <p id="coach-feedback" style="margin:0; font-weight:500;">Analysis...</p>
-            </div>
+            <div class="coach-panel"><p id="coach-feedback">Analysis...</p></div>
 
             <label class="label">Advanced Vocabulary</label>
             <div id="vocab-container" class="vocab-grid"></div>
@@ -150,24 +129,21 @@
             <label class="label">Review Text (Select to define)</label>
             <div id="review-text-container" class="review-box"></div>
 
-            <button id="restart-btn" class="btn-outline">Start New Session</button>
+            <button id="restart-btn" class="btn-outline">New Session</button>
         </section>
-
     </main>
 
     <div id="lookup-tooltip" class="tooltip">
-        <div class="tt-head">
-            <span id="tt-word" class="tt-term">Word</span>
-            <a id="tt-link" href="#" target="_blank" class="tt-link">↗</a>
-        </div>
-        <div id="tt-def" style="line-height:1.4; font-size:0.9rem;">Definition...</div>
+        <div class="tt-head"><span id="tt-word" class="tt-term">Word</span><a id="tt-link" href="#" target="_blank" class="tt-link">↗</a></div>
+        <div id="tt-def">Definition...</div>
     </div>
-    <div id="recall-modal" class="modal-overlay" style="display:none;">
+
+    <div id="recall-modal" class="modal-overlay hidden">
         <div class="modal-content card">
             <h2 class="card-title">Active Recall</h2>
             <p class="card-subtitle">Summarize the paragraph you just read in one sentence.</p>
-            <textarea id="recall-input" class="input-box" style="height:80px; resize:none;" placeholder="This paragraph argues that..."></textarea>
-            <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="resumeFromRecall()">Submit & Resume</button>
+            <textarea id="recall-input" class="input-box recall-input" placeholder="This paragraph argues that..."></textarea>
+            <button class="btn-primary recall-submit" onclick="resumeFromRecall()">Submit & Resume</button>
         </div>
     </div>
 
