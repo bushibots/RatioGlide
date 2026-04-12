@@ -216,7 +216,7 @@ function tick() {
     if (state.words[state.currentWordIndex] === '[RECALL_PAUSE]') {
         clearInterval(state.intervalId);
         getEl('recall-input').value = ""; // Clear previous summary
-        getEl('recall-modal').style.display = 'flex';
+        getEl('recall-modal').classList.remove('hidden');
         state.currentWordIndex++; // Skip the token for when we resume
         return;
     }
@@ -379,8 +379,10 @@ getEl('speed-slider').oninput = (e) => {
 getEl('restart-btn').onclick = () => location.reload();
 getEl('theme-btn').onclick = () => {
     const r = document.documentElement;
+    const b = getEl('theme-btn');
     const n = r.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
     r.setAttribute('data-theme', n);
+    b.textContent = n === 'dark' ? '☀️' : '🌙';
 };
 
 getEl('country-select').addEventListener('change', (e) => {
@@ -409,7 +411,7 @@ window.toggleRecallMode = () => {
 };
 
 window.resumeFromRecall = () => {
-    getEl('recall-modal').style.display = 'none';
+    getEl('recall-modal').classList.add('hidden');
     const multiplier = state.isChunkMode ? 3 : 1;
     state.intervalId = setInterval(tick, (60000 / state.targetWPM) * multiplier);
     tick(); // Show the next word immediately
